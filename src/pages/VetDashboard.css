@@ -1,0 +1,1178 @@
+.vet-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  background: #f8fafc;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Sidebar */
+.vet-sidebar {
+  width: 280px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  z-index: 1001;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vet-sidebar.open {
+  transform: translateX(0) !important;
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+}
+
+.sidebar-overlay.visible {
+  display: block;
+}
+
+.btn-mobile-menu {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.vet-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2.5rem;
+  padding: 0.5rem;
+}
+
+.vet-brand img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+.brand-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.b-name {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.b-role {
+  font-size: 0.75rem;
+  color: #15803d;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.vet-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.vet-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vet-nav button:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.vet-nav button.active {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.vet-sidebar-bottom {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 1.5rem;
+}
+
+.vet-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.vet-user-card img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.u-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.u-info strong {
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.u-info span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.btn-logout {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #fee2e2;
+  background: transparent;
+  color: #dc2626;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  background: #fef2f2;
+}
+
+/* Main */
+.vet-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vet-header {
+  height: 70px;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.date-str {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-transform: capitalize;
+}
+
+.vet-page {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.vet-intro {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.vet-intro h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
+}
+
+.vet-intro p {
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+.btn-vet-primary {
+  background: #15803d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+/* Agenda Grid */
+.vet-grid-agenda {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  align-content: flex-start;
+}
+
+.vet-agenda-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.agenda-sidebar-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: sticky;
+  top: 2rem;
+}
+
+.agenda-stats-mini {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.stat-card-mini {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 20px;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-mini .s-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.stat-card-mini .s-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.selected-date-header {
+  grid-column: 1 / -1;
+  margin-bottom: 0.5rem;
+}
+
+.selected-date-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+@media (max-width: 992px) {
+  .vet-agenda-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .agenda-sidebar-calendar {
+    position: static;
+    max-width: 100%;
+    align-items: center;
+  }
+
+  .agenda-stats-mini {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.vet-card-appointment {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vet-card-appointment:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+}
+
+.app-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.app-info h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.app-info p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.app-notes {
+  margin-top: 10px;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #475569;
+  border-left: 3px solid #cbd5e1;
+}
+
+.status-tag {
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-tag.pending { background: #fef3c7; color: #b45309; }
+.status-tag.confirmed { background: #dcfce7; color: #15803d; }
+
+.app-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 1rem;
+}
+
+.app-actions button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.app-actions button:hover {
+  background: #f8fafc;
+  color: #15803d;
+  border-color: #15803d;
+}
+
+/* Patients Table */
+.vet-table-wrapper {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.vet-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vet-table th {
+  text-align: left;
+  padding: 1rem 1.5rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.vet-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pet-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pet-avatar {
+  width: 32px;
+  height: 32px;
+  background: #15803d;
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.vet-actions-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+  color: #15803d;
+}
+
+.vet-search {
+  position: relative;
+  width: 300px;
+}
+
+.vet-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+.vet-search input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  font-size: 0.9rem;
+}
+
+.vet-search input:focus {
+  border-color: #15803d;
+}
+
+/* Modals */
+.modal-overlay.vet-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.5rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.modal-content.prescription-modal {
+  max-width: 800px;
+}
+
+.modal-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 10;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.form-group-vet {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group-vet label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.form-group-vet input, .form-group-vet textarea {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.form-group-vet input:focus, .form-group-vet textarea:focus {
+  border-color: #15803d;
+}
+
+.btn-vet-primary.full {
+  width: 100%;
+  justify-content: center;
+}
+
+/* Prescription Preview */
+.prescription-preview {
+  display: none; /* Only visible in print */
+  background: white;
+  padding: 2cm;
+}
+
+@media print {
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  
+  body, .vet-layout, .vet-main, .vet-page {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+  
+  .modal-overlay {
+    position: absolute !important;
+    background: white !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+  }
+  
+  .modal-content {
+    box-shadow: none !important;
+    max-width: none !important;
+    max-height: none !important;
+    width: 100% !important;
+  }
+  
+  .modal-header, .vet-sidebar, .vet-header, .modal-scroll-content, .prescription-editor {
+    display: none !important;
+  }
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 16px;
+  border: 1px dotted #cbd5e1;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 991px) {
+  .vet-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+  }
+
+  .btn-mobile-menu {
+    display: flex;
+  }
+
+  .vet-header {
+    padding: 0 1rem;
+  }
+
+  .vet-page {
+    padding: 1.25rem;
+  }
+
+  .vet-intro {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .vet-grid-agenda {
+    grid-template-columns: 1fr;
+  }
+
+  .vet-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .vet-table {
+    min-width: 600px;
+  }
+
+  .vet-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .vet-intro h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-left span {
+    display: none;
+  }
+  
+  .btn-vet-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Novos Estilos de Receituário Premium */
+.prescription-modal-premium {
+  width: 95% !important;
+  max-width: 1000px !important;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.prescription-layout-premium {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.prescription-editor-box {
+  flex-shrink: 0;
+}
+
+/* Base do Papel - Tela */
+.prescription-print-template {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px !important;
+  background: #f1f5f9 !important;
+  display: flex;
+  justify-content: center;
+}
+
+.presc-paper-styled {
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  width: 210mm; /* A4 width */
+  margin: 0 auto;
+}
+
+/* Regras de Impressão */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+  
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .prescription-print-template {
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  .presc-paper-styled {
+    box-shadow: none !important;
+    border: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 1.5cm !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+  
+  @page {
+    size: A4;
+    margin: 0;
+  }
+}
+
+.scroll-modal .modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 70px);
+}
+
+/* Container Principal do Modal de Receita */
+.prescription-premium-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  height: calc(90vh - 70px);
+  background: #f8fafc;
+}
+
+/* Coluna do Editor */
+.presc-editor-side {
+  padding: 1.5rem;
+  background: white;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1e293b;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.presc-textarea {
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid #f1f5f9;
+  border-radius: 12px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  resize: none;
+  background: #fdfdfd;
+  transition: border-color 0.2s;
+}
+
+.presc-textarea:focus {
+  border-color: #15803d;
+}
+
+.btn-vet-confirm-print {
+  width: 100%;
+  height: 50px;
+  background: #15803d;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-vet-confirm-print:hover {
+  background: #166534;
+  transform: translateY(-2px);
+}
+
+/* Coluna do Preview (Papel) */
+.presc-preview-side {
+  padding: 2rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f1f5f9;
+}
+
+.preview-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+
+/* Estilização do Papel Realista */
+.presc-paper-styled {
+  background: white;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 1.5cm;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.presc-top-header {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-bottom: 3px solid #15803d;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.presc-logo-img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.presc-hospital-name {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #15803d;
+  text-transform: uppercase;
+}
+
+.presc-hospital-sub {
+  margin: 0;
+  font-weight: 500;
+  color: #475569;
+}
+
+.presc-hospital-addr {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 5px;
+}
+
+.presc-title-box {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.presc-main-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+.presc-patient-card-styled {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.info-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.info-value-highlight {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.info-sub {
+  margin: 2px 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.presc-med-content {
+  flex: 1;
+}
+
+.presc-med-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #0f172a;
+}
+
+.presc-text-body {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: #1e293b;
+}
+
+.presc-signature-area {
+  margin-top: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.signature-line-dark {
+  width: 300px;
+  height: 2px;
+  background: #0f172a;
+  margin-bottom: 10px;
+}
+
+.signature-name {
+  margin: 0;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.signature-role {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.presc-fine-print {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 40px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 15px;
+}
+
+/* Responsividade Mobile para o Modal */
+@media (max-width: 900px) {
+  .prescription-premium-container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .presc-editor-side {
+    border-right: none;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  
+  .presc-paper-styled {
+    width: 100%;
+    padding: 1cm;
+  }
+}
+
+/* Print Rules Fix */
+@media print {
+  .modal-overlay {
+    background: white !important;
+    padding: 0 !important;
+  }
+  
+  .prescription-premium-container {
+    display: block !important;
+    height: auto !important;
+  }
+  
+  .presc-preview-side {
+    padding: 0 !important;
+    background: white !important;
+  }
+  
+  .presc-paper-styled {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+/* Simplificação do Modal de Receita - Foco no Editor */
+.prescription-simple-editor {
+  padding: 2.5rem;
+  background: white;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.editor-top-info {
+  display: flex;
+  gap: 20px;
+  background: #f8fafc;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.patient-tag, .tutor-tag {
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.patient-tag strong, .tutor-tag strong {
+  color: #15803d;
+}
+
+.presc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.presc-form-group label {
+  font-weight: 600;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.presc-main-textarea {
+  width: 100%;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 15px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  background: #fafafa;
+  transition: all 0.2s;
+  resize: vertical;
+}
+
+.presc-main-textarea:focus {
+  border-color: #15803d;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.presc-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.large-btn {
+  padding: 1.2rem 3rem;
+  font-size: 1.2rem;
+  border-radius: 15px;
+  max-width: 500px;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    max-width: 95vw;
+    border-radius: 12px;
+  }
+
+  .prescription-modal-premium {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh;
+    border-radius: 0 !important;
+  }
+
+  .vet-card-appointment {
+    padding: 1rem;
+  }
+
+  .app-info h3 {
+    font-size: 1rem;
+  }
+
+  .editor-top-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .prescription-simple-editor {
+    padding: 1.25rem;
+  }
+
+  .presc-main-textarea {
+    font-size: 1rem;
+    padding: 1rem;
+  }
+
+  .large-btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    width: 100%;
+    max-width: none;
+  }
+}
