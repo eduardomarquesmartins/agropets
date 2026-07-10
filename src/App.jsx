@@ -1,28 +1,18 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import CategoryList from './components/CategoryList';
 import ProductList from './components/ProductList';
-
-import Cart from './pages/Cart';
-import Login from './pages/Login';
-import UserDashboard from './pages/UserDashboard';
-import CategoryPage from './pages/CategoryPage';
-import AdminDashboard from './pages/AdminDashboard';
-import Checkout from './pages/Checkout';
-import ProductDetail from './pages/ProductDetail';
-import VetDashboard from './pages/VetDashboard';
-import Institutional from './pages/Institutional';
-import SearchPage from './pages/SearchPage';
 import AgroVetSection from './components/AgroVetSection';
 import ScrollToTop from './components/ScrollToTop';
 import MobileNavbar from './components/MobileNavbar';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import CartQuickFinish from './components/CartQuickFinish';
-import CookieConsentBanner from './components/CookieConsentBanner';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import './App.css';
 
@@ -42,6 +32,17 @@ import { useFinancialStore } from './store/financialStore';
 import { useInventoryStore } from './store/inventoryStore';
 import { useAppointmentStore } from './store/appointmentStore';
 
+const Cart = lazy(() => import('./pages/Cart'));
+const Login = lazy(() => import('./pages/Login'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const VetDashboard = lazy(() => import('./pages/VetDashboard'));
+const Institutional = lazy(() => import('./pages/Institutional'));
+const SearchPage = lazy(() => import('./pages/SearchPage'));
+
 function Home() {
   const searchQuery = useSearchStore((state) => state.searchQuery);
 
@@ -58,21 +59,60 @@ function Home() {
       <Hero />
       <CategoryList />
       <ProductList title="Principais Destaques" filterFeatured={true} limit={4} viewAllTo="/busca?featured=1" />
-      <ProductList title={"Ofertas Imperd\u00edveis"} limit={4} viewAllTo="/busca?discount=1&sort=discount" />
-      <ProductList title={"Para C\u00e3es"} filterCategory="cachorros" limit={4} viewAllTo="/categoria/cachorros" />
+      <ProductList title="Ofertas Imperdíveis" limit={4} viewAllTo="/busca?discount=1&sort=discount" />
+      <ProductList title="Para Cães" filterCategory="cachorros" limit={4} viewAllTo="/categoria/cachorros" />
       <ProductList title="Destaques para Gatos" filterCategory="gatos" limit={4} viewAllTo="/categoria/gatos" />
       <AgroVetSection />
     </>
   );
 }
 
-function AppContent() {
+function RouteLoadingFallback() {
+  return (
+    <div className="container" style={{ paddingTop: '3rem', paddingBottom: '3rem' }}>
+      <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Carregando...</div>
+    </div>
+  );
+}
+
+function PublicLayout() {
   const location = useLocation();
+  const { isDrawerOpen } = useCartStore();
+  const shouldShowQuickFinish = location.pathname !== '/cart' && location.pathname !== '/checkout' && !isDrawerOpen;
+
+  return (
+    <div className="app-container">
+      <Header />
+      <main className="main-content-mobile-fix">
+        <Outlet />
+      </main>
+      <Footer />
+      <WhatsAppFloat />
+      {shouldShowQuickFinish && <CartQuickFinish />}
+      <MobileNavbar />
+    </div>
+  );
+}
+
+function DashboardLayout() {
+  return <Outlet />;
+}
+
+function CategoryPageRoute() {
+  const location = useLocation();
+  return <CategoryPage key={`${location.pathname}${location.search}`} />;
+}
+
+function SearchPageRoute() {
+  const location = useLocation();
+  return <SearchPage key={location.search} />;
+}
+
+function AppContent() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const isVet = user?.role === 'vet';
   const { settings, fetchSettings } = useSettingsStore();
-  const { isDrawerOpen } = useCartStore();
 
   const { fetchProducts } = useProductStore();
   const { fetchCategories } = useCategoryStore();
@@ -120,59 +160,54 @@ function AppContent() {
     }
   }, [settings.primaryColor]);
 
-  if (isAdmin && location.pathname.startsWith('/admin')) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/admin" element={<AdminDashboard />} />
-        </Routes>
-      </>
-    );
-  }
-
-  if (isVet && location.pathname.startsWith('/vet')) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/vet" element={<VetDashboard />} />
-        </Routes>
-      </>
-    );
-  }
-
   return (
-    <div className="app-container">
-      <Toaster position="top-right" />
-      <Header />
-      <main className="main-content-mobile-fix">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/minha-conta" element={<UserDashboard />} />
-          <Route path="/categoria/:categoryData" element={<CategoryPage key={`${location.pathname}${location.search}`} />} />
-          <Route path="/produto/:id" element={<ProductDetail />} />
-          <Route path="/busca" element={<SearchPage key={location.search} />} />
-          <Route path="/sobre" element={<Institutional />} />
-          <Route path="/nossas-lojas" element={<Institutional />} />
-          <Route path="/politica-de-privacidade" element={<Institutional />} />
-          <Route path="/trocas-e-devolucoes" element={<Institutional />} />
-          <Route path="/faq" element={<Institutional />} />
-          <Route path="/fale-conosco" element={<Institutional />} />
-          <Route path="/admin" element={isAdmin ? <AdminDashboard /> : <Login />} />
-          <Route path="/vet" element={isVet ? <VetDashboard /> : <Login />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-      <Footer />
-      <WhatsAppFloat />
-      {location.pathname !== '/cart' && location.pathname !== '/checkout' && !isDrawerOpen && <CartQuickFinish />}
-      <MobileNavbar />
-      {/* <CookieConsentBanner /> */}
-    </div>
+    <Routes>
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/minha-conta"
+          element={
+            <ProtectedRoute allowedRoles={['customer']}>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/categoria/:categoryData" element={<CategoryPageRoute />} />
+        <Route path="/produto/:id" element={<ProductDetail />} />
+        <Route path="/busca" element={<SearchPageRoute />} />
+        <Route path="/ofertas" element={<Navigate to="/busca?discount=1&sort=discount" replace />} />
+        <Route path="/sobre" element={<Institutional />} />
+        <Route path="/nossas-lojas" element={<Institutional />} />
+        <Route path="/politica-de-privacidade" element={<Institutional />} />
+        <Route path="/trocas-e-devolucoes" element={<Institutional />} />
+        <Route path="/faq" element={<Institutional />} />
+        <Route path="/fale-conosco" element={<Institutional />} />
+      </Route>
+
+      <Route element={<DashboardLayout />}>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vet"
+          element={
+            <ProtectedRoute allowedRoles={['vet']}>
+              <VetDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
@@ -180,7 +215,10 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <AppContent />
+      <Toaster position="top-right" />
+      <Suspense fallback={<RouteLoadingFallback />}>
+        <AppContent />
+      </Suspense>
     </Router>
   );
 }

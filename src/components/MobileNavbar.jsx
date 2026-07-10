@@ -2,12 +2,21 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, ShoppingCart, User } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 import './MobileNavbar.css';
 
 const MobileNavbar = () => {
   const location = useLocation();
+  const { user } = useAuthStore();
   const { cart, setDrawerOpen } = useCartStore();
   const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
+  const accountPath = user
+    ? user.role === 'admin'
+      ? '/admin'
+      : user.role === 'vet'
+        ? '/vet'
+        : '/minha-conta'
+    : `/login?redirect=${encodeURIComponent('/minha-conta')}`;
 
   // Não mostrar o navbar no admin
   if (location.pathname.startsWith('/admin')) return null;
@@ -33,8 +42,8 @@ const MobileNavbar = () => {
       </button>
 
       <Link 
-        to="/login" 
-        className={`mobile-nav-item ${location.pathname === '/login' || location.pathname === '/minha-conta' ? 'active' : ''}`}
+        to={accountPath} 
+        className={`mobile-nav-item ${location.pathname === '/login' || location.pathname === '/minha-conta' || location.pathname === '/admin' || location.pathname === '/vet' ? 'active' : ''}`}
         onClick={() => setDrawerOpen(false)}
       >
         <User size={22} />

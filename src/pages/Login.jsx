@@ -60,7 +60,7 @@ const Login = () => {
     }
   };
 
-  const handleProfileSubmit = (e) => {
+  const handleProfileSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateCPF(profileData.cpf)) {
@@ -73,9 +73,9 @@ const Login = () => {
       return;
     }
 
-    updateProfile(profileData);
+    await updateProfile(profileData);
     toast.success('Cadastro finalizado com sucesso!');
-    navigate('/');
+    navigate(redirectPath);
   };
 
   const handleTraditionalLogin = async (e) => {

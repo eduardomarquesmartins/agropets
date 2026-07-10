@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { useWishlistStore, useCartStore } from '../store/cartStore';
 import { ShoppingBag, Heart, User as UserIcon, LogOut, Settings, Trash2, ShoppingCart, Dog, MapPin, Phone, Hash, Calendar, Box, CheckCircle, Clock, Plus, Edit } from 'lucide-react';
@@ -11,17 +11,24 @@ import './UserDashboard.css';
 const UserDashboard = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { wishlist, toggleWishlist } = useWishlistStore();
   const { addToCart } = useCartStore();
   const { fetchUserOrders } = useOrderStore();
   
   const { pets, addPet, updatePet, deletePet, fetchPets } = usePetStore();
+  const activeTabParam = searchParams.get('tab');
+  const activeTab = activeTabParam === 'wishlist' || activeTabParam === 'profile' ? activeTabParam : 'orders';
+  const setActiveTab = (tab) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (tab === 'orders') {
+      nextParams.delete('tab');
+    } else {
+      nextParams.set('tab', tab);
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
   
-  const [activeTab, setActiveTab] = useState(() => {
-    // Try to get tab from URL, fallback to 'orders'
-    const params = new URLSearchParams(window.location.search);
-    return params.get('tab') || 'orders';
-  });
   const [userOrders, setUserOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
 
@@ -99,12 +106,6 @@ const UserDashboard = () => {
       toast.success('Pet removido.');
     }
   };
-
-  useEffect(() => {
-    if (!user) {
-      navigate('/login');
-    }
-  }, [user, navigate]);
 
   if (!user) {
     return null;

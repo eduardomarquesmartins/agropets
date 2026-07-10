@@ -88,9 +88,20 @@ const Header = () => {
   const { user } = useAuthStore();
   const { settings } = useSettingsStore();
   const { categories } = useCategoryStore();
+  const customerAccountPath = '/minha-conta';
+  const accountRedirect = `/login?redirect=${encodeURIComponent(customerAccountPath)}`;
+  const wishlistRedirect = `/login?redirect=${encodeURIComponent('/minha-conta?tab=wishlist')}`;
+  const accountPath = user
+    ? user.role === 'admin'
+      ? '/admin'
+      : user.role === 'vet'
+        ? '/vet'
+        : customerAccountPath
+    : accountRedirect;
+  const wishlistPath = user ? `${customerAccountPath}?tab=wishlist` : wishlistRedirect;
   
   const { searchQuery, setSearchQuery } = useSearchStore();
-  
+
   const [isCepModalOpen, setIsCepModalOpen] = useState(false);
   const [cep, setCep] = useState('');
   const [cepResult, setCepResult] = useState(null);
@@ -129,7 +140,7 @@ const Header = () => {
     setSearchQuery(value);
     if (value.trim()) {
       navigate(`/busca?q=${encodeURIComponent(value.trim())}`);
-    } else if (window.location.pathname === '/busca') {
+    } else if (location.pathname === '/busca') {
       navigate('/');
     }
   };
@@ -200,15 +211,15 @@ const Header = () => {
             </button>
 
             {user ? (
-              <Link to={user.role === 'admin' ? '/admin' : '/minha-conta'} className="action-item">
+              <Link to={accountPath} className="action-item">
                 <User className="icon" size={24} />
                 <div className="action-text">
                   <span>Olá, {(user.name || 'Usuário').split(' ')[0]}</span>
-                  <span>{user.role === 'admin' ? 'Painel Admin' : 'Minha Conta'}</span>
+                  <span>{user.role === 'admin' ? 'Painel Admin' : user.role === 'vet' ? 'Painel Vet' : 'Minha Conta'}</span>
                 </div>
               </Link>
             ) : (
-              <Link to="/login" className="action-item">
+              <Link to={accountPath} className="action-item">
                 <User className="icon" size={24} />
                 <div className="action-text">
                   <span>Bem-vindo</span>
@@ -217,7 +228,7 @@ const Header = () => {
               </Link>
             )}
 
-            <Link to={user ? "/minha-conta?tab=wishlist" : "/login"} className="action-item">
+            <Link to={wishlistPath} className="action-item">
               <div style={{ position: 'relative' }}>
                 <Heart className="icon" size={24} color={'#f97316'}/>
                 {wishlistCount > 0 && <div className="cart-badge" style={{ backgroundColor: '#f97316' }}>{wishlistCount}</div>}
