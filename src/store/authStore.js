@@ -71,9 +71,9 @@ export const useAuthStore = create((set, get) => ({
     }
 
     try {
-      const { data: { user: authUser }, error } = await supabase.auth.getUser();
+      const { data: { session }, error } = await supabase.auth.getSession();
       if (error) throw error;
-      set({ user: authUser ? await loadProfile(authUser) : null });
+      set({ user: session?.user ? await loadProfile(session.user) : null });
     } catch (error) {
       console.error('Erro ao restaurar a sessão:', error);
       await supabase.auth.signOut();
