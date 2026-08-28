@@ -318,7 +318,6 @@ const Login = () => {
 
               <div className="login-footer">
                 <p>Não tem uma conta? <button className="btn-link" onClick={() => setStep('signup')}>Cadastre-se</button></p>
-                <p>Já possui cadastro? <button className="btn-link" onClick={() => setStep('claim-account')}>Ative seu acesso</button></p>
               </div>
             </>
           ) : step === 'signup' ? (
