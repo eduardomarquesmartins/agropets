@@ -1,6 +1,23 @@
 import { create } from 'zustand';
 import { supabase } from '../services/supabase';
-import { hashPassword } from '../utils/passwordUtils';
+
+const callAdminUsersApi = async (method, payload) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) throw new Error('Sessão expirada.');
+
+  const response = await fetch('/api/admin-users', {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (response.status === 204) return null;
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Erro ao atualizar equipe.');
+  return data;
+};
 
 export const useAdminUserStore = create(
   (set, get) => ({
@@ -26,64 +43,38 @@ export const useAdminUserStore = create(
     },
 
     addAdminUser: async (user) => {
-      const id = crypto.randomUUID();
-      const dataForDb = {
-        id,
-        name: user.name,
-        email: user.email,
-        password: user.password ? await hashPassword(user.password) : '',
-        role: user.role || 'editor',
-        status: 'active'
-      };
-
       try {
-        const { error } = await supabase.from('admin_users').insert([dataForDb]);
-        if (error) throw error;
-
-        // Não incluir password no estado local
-        const { password: _, ...userWithoutPassword } = dataForDb;
+        const result = await callAdminUsersApi('POST', user);
         set((state) => ({
-          adminUsers: [...state.adminUsers, { ...userWithoutPassword, createdAt: new Date().toISOString() }]
+          adminUsers: [...state.adminUsers, result.user]
         }));
       } catch (err) {
         console.error('Erro ao adicionar usuário admin no Supabase:', err);
+        throw err;
       }
     },
 
     updateAdminUser: async (id, updatedUser) => {
-      const dataForDb = {
-        name: updatedUser.name,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        status: updatedUser.status
-      };
-
-      if (updatedUser.password && updatedUser.password.trim() !== '') {
-        dataForDb.password = await hashPassword(updatedUser.password);
-      }
-
       try {
-        const { error } = await supabase.from('admin_users').update(dataForDb).eq('id', id);
-        if (error) throw error;
-
+        const result = await callAdminUsersApi('PUT', { id, ...updatedUser });
         set((state) => ({
-          adminUsers: state.adminUsers.map(u => u.id === id ? { ...u, ...updatedUser } : u)
+          adminUsers: state.adminUsers.map(u => u.id === id ? result.user : u)
         }));
       } catch (err) {
         console.error('Erro ao atualizar usuário admin no Supabase:', err);
+        throw err;
       }
     },
 
     deleteAdminUser: async (id) => {
       try {
-        const { error } = await supabase.from('admin_users').delete().eq('id', id);
-        if (error) throw error;
-
+        await callAdminUsersApi('DELETE', { id });
         set((state) => ({
           adminUsers: state.adminUsers.filter(u => u.id !== id)
         }));
       } catch (err) {
         console.error('Erro ao deletar usuário admin no Supabase:', err);
+        throw err;
       }
     },
 
@@ -94,12 +85,11 @@ export const useAdminUserStore = create(
 
       const newStatus = user.status === 'active' ? 'inactive' : 'active';
       try {
-        const { error } = await supabase.from('admin_users').update({ status: newStatus }).eq('id', id);
-        if (error) throw error;
-
-        set({ adminUsers: adminUsers.map(u => u.id === id ? { ...u, status: newStatus } : u) });
+        const result = await callAdminUsersApi('PUT', { id, status: newStatus });
+        set({ adminUsers: adminUsers.map(u => u.id === id ? result.user : u) });
       } catch (err) {
         console.error('Erro ao alternar status do usuário no Supabase:', err);
+        throw err;
       }
     },
   })

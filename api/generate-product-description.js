@@ -1,5 +1,6 @@
 const MODEL = process.env.OPENAI_MODEL || 'gpt-4o-mini';
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+import { requireStaffUser } from './_lib/requestAuth.js';
 
 const sanitizeText = (value, maxLength = 300) =>
   String(value || '')
@@ -28,6 +29,12 @@ Regras:
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    await requireStaffUser(req);
+  } catch (error) {
+    return res.status(error.statusCode || 401).json({ error: error.message });
   }
 
   if (!OPENAI_API_KEY) {

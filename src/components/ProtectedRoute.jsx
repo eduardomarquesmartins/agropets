@@ -12,8 +12,10 @@ const getDefaultPathForUser = (user) => {
 const buildRedirectPath = (location) => `${location.pathname}${location.search}${location.hash}`;
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user } = useAuthStore();
+  const { user, isReady } = useAuthStore();
   const location = useLocation();
+
+  if (!isReady) return null;
 
   if (!user) {
     const redirect = encodeURIComponent(buildRedirectPath(location));

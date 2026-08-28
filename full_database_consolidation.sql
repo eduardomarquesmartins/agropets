@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS public.coupons (
   once_per_cpf BOOLEAN DEFAULT false,
   max_uses INTEGER,
   used_count INTEGER DEFAULT 0,
+  minimum_purchase_amount DECIMAL(10,2) NOT NULL DEFAULT 0 CHECK (minimum_purchase_amount >= 0),
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -283,8 +284,9 @@ ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS subtitle TEXT;
 ALTER TABLE public.banners ADD COLUMN IF NOT EXISTS title TEXT;
 
 -- ============================================================
--- 3. RLS — Permitir leitura pública e escrita para todos
---    (anon key consegue fazer tudo — adequado para este projeto)
+-- 3. RLS — Habilitar proteção por padrão
+-- As políticas de acesso são definidas na migração versionada
+-- supabase/migrations/20260828181024_harden_auth_and_rls.sql.
 -- ============================================================
 
 DO $$
@@ -292,10 +294,6 @@ DECLARE tbl RECORD;
 BEGIN
   FOR tbl IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', tbl.tablename);
-    EXECUTE format('DROP POLICY IF EXISTS "public_read_%I" ON public.%I', tbl.tablename, tbl.tablename);
-    EXECUTE format('DROP POLICY IF EXISTS "public_write_%I" ON public.%I', tbl.tablename, tbl.tablename);
-    EXECUTE format('CREATE POLICY "public_read_%I" ON public.%I FOR SELECT USING (true)', tbl.tablename, tbl.tablename);
-    EXECUTE format('CREATE POLICY "public_write_%I" ON public.%I FOR ALL USING (true) WITH CHECK (true)', tbl.tablename, tbl.tablename);
   END LOOP;
 END $$;
 
@@ -303,11 +301,5 @@ END $$;
 -- 4. DADOS INICIAIS (ON CONFLICT — não sobrescreve dados reais)
 -- ============================================================
 
--- Usuário admin padrão (só insere se não existir)
-INSERT INTO public.admin_users (name, email, password, role, status)
-VALUES ('Administrador', 'admin@agropets.com.br', 'admin', 'admin', 'active')
-ON CONFLICT (email) DO UPDATE SET role = 'admin', status = 'active';
-
-INSERT INTO public.admin_users (name, email, password, role, status)
-VALUES ('Veterinário', 'vet@agropets.com.br', 'vet123', 'vet', 'active')
-ON CONFLICT (email) DO UPDATE SET role = 'vet', status = 'active';
+-- Usuários administrativos devem ser criados no Supabase Auth e vinculados
+-- manualmente a public.admin_users depois de aplicar a migração de segurança.

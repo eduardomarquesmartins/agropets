@@ -33,18 +33,15 @@ export const useOrderStore = create(
     },
 
     // Usado por clientes — filtra pelo whatsapp normalizado
-    fetchUserOrders: async (whatsapp) => {
-      if (!whatsapp) return [];
+    fetchUserOrders: async (authUserId) => {
+      if (!authUserId) return [];
       set({ isLoading: true, error: null });
-
-      // Normaliza para garantir match com o que foi salvo no banco
-      const cleanPhone = whatsapp.replace(/\D/g, '');
 
       try {
         const { data, error } = await supabase
           .from('orders')
           .select('*')
-          .eq('whatsapp', cleanPhone)
+          .eq('customer_auth_id', authUserId)
           .order('created_at', { ascending: false });
 
         if (error) throw error;

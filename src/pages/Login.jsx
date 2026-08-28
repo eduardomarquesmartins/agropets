@@ -124,6 +124,11 @@ const Login = () => {
     });
     
     if (newUser) {
+      if (newUser.needsEmailConfirmation) {
+        toast.success('Conta criada. Confirme o e-mail para entrar.');
+        setStep('selection');
+        return;
+      }
       toast.success('Conta criada com sucesso!');
       navigate(redirectPath);
     } else {

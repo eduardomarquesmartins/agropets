@@ -7,7 +7,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { useCartStore } from '../store/cartStore';
 import { evolutionApi } from '../services/evolutionApi';
-import { useProductStore } from '../store/productStore';
 import { useSettingsStore } from '../store/settingsStore';
 import { validateCEP } from '../utils/stringUtils';
 import { useAuthStore } from '../store/authStore';
@@ -20,7 +19,6 @@ import './Checkout.css';
 
 const Checkout = () => {
   const { cart, clearCart } = useCartStore();
-  const { deductStock } = useProductStore();
   const { settings } = useSettingsStore();
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -95,9 +93,9 @@ const Checkout = () => {
   const getDiscount = () => {
     if (!appliedCoupon) return 0;
     if (appliedCoupon.type === 'percentage') {
-      return (subtotal * appliedCoupon.value) / 100;
+      return Math.min(subtotal, (subtotal * appliedCoupon.value) / 100);
     }
-    return appliedCoupon.value;
+    return Math.min(subtotal, appliedCoupon.value);
   };
 
   const couponDiscount = getDiscount();
@@ -107,7 +105,7 @@ const Checkout = () => {
   const isCardPayment = formData.formaPagamento === 'Cartão';
   const interestAmount = isCardPayment ? (subtotal * (settings.installmentInterest || 0) / 100) : 0;
   
-  const total = subtotal + selectedFee - couponDiscount - cashDiscountAmount + interestAmount;
+  const total = Math.max(0, subtotal + selectedFee - couponDiscount - cashDiscountAmount + interestAmount);
   const pixCopyPaste = buildPixCopyPaste({
     pixKey: settings.pixKey,
     amount: total,
@@ -126,7 +124,7 @@ const Checkout = () => {
       return;
     }
 
-    const result = await validateCoupon(couponCode, formData.cpf);
+    const result = await validateCoupon(couponCode, formData.cpf, subtotal);
     if (result.valid) {
       setAppliedCoupon(result.coupon);
       setCouponMsg({ type: 'success', text: `Cupom "${result.coupon.code}" aplicado!` });
@@ -238,6 +236,12 @@ const Checkout = () => {
   const handleWhatsAppOrder = async (e) => {
     e.preventDefault();
 
+    if (!user?.authUserId) {
+      toast.error('Faça login para finalizar o pedido.');
+      navigate('/login?redirect=/checkout');
+      return;
+    }
+
     if (!validateCEP(formData.cep)) {
       setCepError('A Agropets atende somente a região de Viamão/RS. Por favor, utilize um CEP válido da região (94400-000 a 94599-999).');
       return;
@@ -249,18 +253,16 @@ const Checkout = () => {
     const encodedMessage = encodeURIComponent(mensagem);
     const whatsappUrl = `https://wa.me/${foneAgropets.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-    // Abre a janela ANTES dos awaits para não ser bloqueado pelo COOP
-    const whatsappWindow = window.open(whatsappUrl, '_blank');
-
     try {
       // Normaliza whatsapp para garantir match em fetchUserOrders
       const cleanWhatsapp = formData.whatsapp.replace(/\D/g, '');
 
       const orderData = {
-        id: `PED-${Math.floor(1000 + Math.random() * 9000)}`,
+        id: `PED-${crypto.randomUUID()}`,
         customer: formData.nome,
         email: user?.email || '',
         items: cart.map(i => ({
+          productId: i.id,
           name: i.name + (i.selectedVariation ? ` (${i.selectedVariation.weight})` : ''),
           qty: i.quantity,
           price: i.price,
@@ -284,10 +286,11 @@ const Checkout = () => {
       };
 
       // 1. Salvar pedido no Supabase — se falhar, interrompe tudo
-      const { error: sbError } = await supabase
+      const { data: savedOrder, error: sbError } = await supabase
         .from('orders')
         .insert([{
           order_number: orderData.id,
+          customer_auth_id: user.authUserId,
           customer_name: orderData.customer,
           whatsapp: cleanWhatsapp,
           email: orderData.email,
@@ -302,7 +305,9 @@ const Checkout = () => {
           address: orderData.address,
           cep: orderData.cep,
           coupon_used: orderData.couponUsed
-        }]);
+        }])
+        .select('id')
+        .single();
 
       if (sbError) {
         console.error('Erro ao salvar pedido no Supabase:', sbError);
@@ -310,14 +315,13 @@ const Checkout = () => {
         return;
       }
 
-      // 2. Pedido salvo com sucesso — agora deduz estoque
-      for (const item of cart) {
-        await deductStock(item.id, item.quantity, 'Venda Online', user?.id, item.selectedVariation?.weight);
-      }
+      // 2. A reserva e o log de estoque ocorrem em uma única transação no banco.
+      const { error: stockError } = await supabase.rpc('reserve_order_stock', { p_order_id: savedOrder.id });
+      if (stockError) throw stockError;
 
       // 3. Resgatar cupom (apenas após pedido confirmado)
       if (appliedCoupon) {
-        await redeemCoupon(appliedCoupon.code, formData.cpf);
+        await redeemCoupon(savedOrder.id);
       }
 
       // 4. Enviar e-mail de confirmação (não-bloqueante)
@@ -327,10 +331,9 @@ const Checkout = () => {
         );
       }
 
-      // 5. WhatsApp já foi aberto antes dos awaits — fallback se foi bloqueado
-      if (!whatsappWindow || whatsappWindow.closed) {
-        window.location.href = whatsappUrl;
-      }
+      // 5. Só abre o WhatsApp depois de persistir o pedido.
+      const whatsappWindow = window.open(whatsappUrl, '_blank');
+      if (!whatsappWindow || whatsappWindow.closed) window.location.href = whatsappUrl;
 
       setOrderSuccess(true);
       clearCart();

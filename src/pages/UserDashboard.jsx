@@ -47,8 +47,7 @@ const UserDashboard = () => {
     if (user?.email) {
       const loadOrders = async () => {
         setIsLoadingOrders(true);
-        const phone = (user.phone || user.whatsapp || '').replace(/\D/g, '');
-        const data = await fetchUserOrders(phone);
+        const data = await fetchUserOrders(user.authUserId);
         setUserOrders(data);
         setIsLoadingOrders(false);
       };

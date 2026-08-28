@@ -36,13 +36,17 @@ export default async function handler(req, res) {
   }
 
   const { from, to, subject, html } = req.body || {};
-  const apiKey = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY;
-  const forwardedFor = req.headers['x-forwarded-for'];
-  const rateLimitKey = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor || 'unknown';
-
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error('RESEND_API_KEY is not defined');
     return res.status(500).json({ error: 'Mail server configuration error' });
+  }
+
+  let user;
+  try {
+    user = await requireAuthenticatedUser(req);
+  } catch (error) {
+    return res.status(error.statusCode || 401).json({ error: error.message });
   }
 
   const sender = DEFAULT_SENDERS.has(from) ? from : 'Agropets <onboarding@resend.dev>';
@@ -52,11 +56,11 @@ export default async function handler(req, res) {
   const cleanSubject = String(subject || '').trim().slice(0, 160);
   const cleanHtml = sanitizeHtml(html).slice(0, 30000);
 
-  if (isRateLimited(rateLimitKey)) {
+  if (isRateLimited(user.id)) {
     return res.status(429).json({ error: 'Too many email requests. Try again later.' });
   }
 
-  if (recipients.length === 0 || recipients.length > 5 || !recipients.every((email) => emailRegex.test(email))) {
+  if (recipients.length !== 1 || recipients[0] !== user.email || !recipients.every((email) => emailRegex.test(email))) {
     return res.status(400).json({ error: 'Invalid recipient list' });
   }
 
@@ -92,3 +96,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
+import { requireAuthenticatedUser } from './_lib/requestAuth.js';

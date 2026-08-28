@@ -65,7 +65,7 @@ const AdminDashboard = () => {
 
   // Form States
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', cpf: '', birthDate: '', location: '', address: '', number: '', neighborhood: '', cep: '', complement: '', petType: 'cachorros' });
-  const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', expiry: '', active: true, oncePerCpf: false, maxUses: '', quantity: 1 });
+  const [couponForm, setCouponForm] = useState({ code: '', type: 'percentage', value: '', expiry: '', active: true, oncePerCpf: false, maxUses: '', minimumPurchaseAmount: '', quantity: 1 });
   const [bannerForm, setBannerForm] = useState({ title: '', subtitle: '', img: '', link: '', buttonText: '', status: 'active', position: 1 });
   const [teamForm, setTeamForm] = useState({ name: '', email: '', role: 'editor', password: '' });
   const [categoryForm, setCategoryForm] = useState({ name: '', img: '', subCategories: [] });
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
     setModalMode(mode);
     setEditingItem(item);
     if (mode === 'customer') setCustomerForm(item ? { ...item } : { name: '', email: '', phone: '', cpf: '', birthDate: '', location: '', address: '', number: '', neighborhood: '', cep: '', complement: '', petType: 'cachorros' });
-    if (mode === 'coupon') setCouponForm(item ? { ...item } : { code: '', type: 'percentage', value: '', expiry: '', active: true, oncePerCpf: false, maxUses: '', quantity: 1 });
+    if (mode === 'coupon') setCouponForm(item ? { ...item, minimumPurchaseAmount: item.minimumPurchaseAmount ?? 0 } : { code: '', type: 'percentage', value: '', expiry: '', active: true, oncePerCpf: false, maxUses: '', minimumPurchaseAmount: '', quantity: 1 });
     if (mode === 'banner') setBannerForm(item ? { ...item } : { title: '', subtitle: '', img: '', link: '', buttonText: '', status: 'active', position: 1 });
     if (mode === 'team') setTeamForm(item ? { ...item } : { name: '', email: '', role: 'editor', password: '' });
     if (mode === 'category') setCategoryForm(item ? { ...item } : { name: '', img: '', subCategories: [] });
@@ -122,7 +122,7 @@ const AdminDashboard = () => {
       if (modalMode === 'customer') {
         editingItem ? await updateCustomer(editingItem.id, customerForm) : await addCustomer(customerForm);
       } else if (modalMode === 'coupon') {
-        const data = { ...couponForm, value: parseFloat(couponForm.value), maxUses: couponForm.maxUses ? parseInt(couponForm.maxUses) : null };
+        const data = { ...couponForm, value: parseFloat(couponForm.value), maxUses: couponForm.maxUses ? parseInt(couponForm.maxUses) : null, minimumPurchaseAmount: Math.max(0, parseFloat(couponForm.minimumPurchaseAmount) || 0) };
         editingItem ? await updateCoupon(editingItem.id, data) : await addCoupon(data);
       } else if (modalMode === 'banner') {
         editingItem ? await updateBanner(editingItem.id, bannerForm) : await addBanner(bannerForm);
@@ -276,6 +276,7 @@ const AdminDashboard = () => {
                        </div>
                        <div className="form-group"><label>Valor</label><input type="number" className="admin-input" required value={couponForm.value} onChange={e => setCouponForm({...couponForm, value: e.target.value})} style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} /></div>
                     </div>
+                    <div className="form-group"><label>Compra mínima (R$)</label><input type="number" className="admin-input" min="0" step="0.01" value={couponForm.minimumPurchaseAmount} onChange={e => setCouponForm({...couponForm, minimumPurchaseAmount: e.target.value})} style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} /><small style={{ color: '#64748b' }}>Use 0 para não exigir valor mínimo.</small></div>
                   </div>
                 )}
                 

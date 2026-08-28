@@ -4,17 +4,13 @@ import { validateAndFormatPhone } from '../utils/stringUtils';
  * Serviço de integração com a Evolution API para envio de mensagens via WhatsApp.
  */
 
-const API_URL = import.meta.env.VITE_EVOLUTION_API_URL;
-const API_KEY = import.meta.env.VITE_EVOLUTION_API_KEY;
-const INSTANCE = import.meta.env.VITE_EVOLUTION_INSTANCE;
-
 export const evolutionApi = {
   /**
    * Envia uma mensagem de texto simples.
    * @param {string} number Número do destinatário (com código do país e DDD)
    * @param {string} text Conteúdo da mensagem
    */
-  async sendText(number, text) {
+  async sendText(number) {
     const cleanNumber = validateAndFormatPhone(number);
     
     if (!cleanNumber) {
@@ -22,37 +18,10 @@ export const evolutionApi = {
       return { success: false, error: 'Número de telefone inválido' };
     }
 
-    if (!API_URL || !API_KEY || !INSTANCE) {
-      console.log('Evolution API: Credenciais não detectadas no .env. Usando link wa.me direto.');
-      return { success: false, error: 'Configuração ausente' };
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/message/sendText/${INSTANCE}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': API_KEY
-        },
-        body: JSON.stringify({
-          number: cleanNumber,
-          text: text,
-          delay: 1200, // Simula digitação por 1.2s
-          link_preview: true
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erro ao enviar mensagem via Evolution API');
-      }
-
-      return { success: true, data };
-    } catch (error) {
-      console.error('Erro no serviço Evolution API:', error);
-      return { success: false, error: error.message };
-    }
+    // A chave da Evolution API não pode ser distribuída no bundle do navegador.
+    // O envio automático deve ser feito exclusivamente por uma função protegida no servidor.
+    console.warn('Envio automático de WhatsApp indisponível no cliente. Use o link wa.me.');
+    return { success: false, error: 'Envio automático indisponível' };
   },
 
   /**

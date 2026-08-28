@@ -29,9 +29,16 @@ const callEmailApi = async (payload) => {
     }
 
     // Produção — usa a serverless function da Vercel
+    const { supabase } = await import('./supabase');
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) return { success: false, error: 'Sessão expirada.' };
+
     const response = await fetch('/api/send-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
       body: JSON.stringify(payload),
     });
 
@@ -50,21 +57,12 @@ const callEmailApi = async (payload) => {
 
 export const emailService = {
   sendPasswordResetEmail: async (toEmail) => {
-    return await callEmailApi({
-      from: 'Agropets <onboarding@resend.dev>',
-      to: [toEmail],
-      subject: 'Recuperação de Senha - Agropets',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
-          <h2 style="color: #15803d; text-align: center;">Agropets</h2>
-          <p>Recebemos uma solicitação para redefinir sua senha no sistema Agropets.</p>
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="#" style="background: #15803d; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Redefinir Minha Senha</a>
-          </div>
-          <p style="font-size: 0.8rem; color: #94a3b8; text-align: center;">Este é um e-mail automático enviado via Resend.</p>
-        </div>
-      `
+    const { supabase } = await import('./supabase');
+    if (!supabase) return { success: false, error: 'Serviço de autenticação indisponível.' };
+    const { error } = await supabase.auth.resetPasswordForEmail(toEmail, {
+      redirectTo: `${window.location.origin}/login`,
     });
+    return error ? { success: false, error: error.message } : { success: true };
   },
 
   sendOrderConfirmation: async (order, user) => {

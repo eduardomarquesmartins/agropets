@@ -162,7 +162,7 @@
   "orders": [
     {
       "id": "PED-8358",
-      "customer": "eduardo",
+      "customer": "Cliente de exemplo",
       "email": "",
       "items": [
         {
@@ -189,12 +189,12 @@
       "status": "Pendente",
       "payment": "PIX",
       "address": {
-        "endereco": "Rua Calil Miguel Allem",
-        "numero": "345",
+        "endereco": "Rua de Exemplo",
+        "numero": "100",
         "bairro": "Centro"
       },
-      "cep": " 94410-223",
-      "whatsapp": "5199309195",
+      "cep": "94400-000",
+      "whatsapp": "",
       "timestamp": "2026-03-25T11:47:51.649Z"
     }
   ],
@@ -202,8 +202,8 @@
     {
       "id": "1",
       "petName": "Bento",
-      "ownerName": "Eduardo",
-      "email": "edumartinsclaro@gmail.com",
+      "ownerName": "Cliente de exemplo",
+      "email": "cliente@example.com",
       "service": "Vacinação",
       "time": "10:00",
       "date": "2026-03-24",
@@ -503,41 +503,7 @@
       "fee": 10
     }
   ],
-  "users": [
-    {
-      "id": "1",
-      "name": "Administrador",
-      "email": "admin@agropets.com.br",
-      "password": "admin",
-      "role": "admin",
-      "isProfileComplete": true
-    },
-    {
-      "id": "3",
-      "name": "Dra. Agropet Cão",
-      "email": "vet@agropets.com.br",
-      "password": "vet123",
-      "role": "vet",
-      "isProfileComplete": true
-    },
-    {
-      "id": "5e07",
-      "role": "customer",
-      "isProfileComplete": true,
-      "name": "eduardo",
-      "email": "edumartinsclaro@gmail.com",
-      "password": "123456",
-      "cpf": "851.598.910-72",
-      "phone": "(51) 99309-1925",
-      "birthDate": "1998-12-26",
-      "zipCode": "94853190",
-      "address": "Rua Andrade Neves",
-      "number": "634",
-      "neighborhood": "Aparecida",
-      "city": "Alvorada",
-      "createdAt": "2026-03-25T10:52:52.356Z"
-    }
-  ],
+  "users": [],
   "audit_logs": [],
   "$schema": "./node_modules/json-server/schema.json"
 }

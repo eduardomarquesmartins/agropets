@@ -3,7 +3,7 @@ import { Buffer } from 'node:buffer';
 import process from 'node:process';
 
 const PORT = Number(process.env.TEF_AGENT_PORT || 8787);
-const MOCK_ENABLED = String(process.env.TEF_AGENT_MOCK_ENABLED || 'true').toLowerCase() === 'true';
+const MOCK_ENABLED = String(process.env.TEF_AGENT_MOCK_ENABLED || 'false').toLowerCase() === 'true';
 const ALLOWED_ORIGINS = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',

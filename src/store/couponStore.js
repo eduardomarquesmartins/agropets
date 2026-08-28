@@ -21,7 +21,8 @@ export const useCouponStore = create(
               ...c,
               usageCount: c.used_count,
               oncePerCpf: c.once_per_cpf,
-              maxUses: c.max_uses
+              maxUses: c.max_uses,
+              minimumPurchaseAmount: Number(c.minimum_purchase_amount) || 0
             }));
             set({ coupons: mapped });
           }
@@ -43,6 +44,7 @@ export const useCouponStore = create(
           active: coupon.active ?? true,
           once_per_cpf: coupon.oncePerCpf ?? false,
           max_uses: coupon.maxUses ? parseInt(coupon.maxUses) : null,
+          minimum_purchase_amount: Math.max(0, parseFloat(coupon.minimumPurchaseAmount) || 0),
           used_count: 0
         };
 
@@ -54,7 +56,7 @@ export const useCouponStore = create(
           }
 
           set((state) => ({
-            coupons: [...state.coupons, { ...coupon, id, usageCount: 0, usedByCpfs: [] }]
+            coupons: [...state.coupons, { ...coupon, id, usageCount: 0, usedByCpfs: [], minimumPurchaseAmount: dataForDb.minimum_purchase_amount }]
           }));
         } catch (err) {
           console.error('Erro ao adicionar cupom no Supabase:', err);
@@ -69,7 +71,8 @@ export const useCouponStore = create(
           expiry: updatedCoupon.expiry,
           active: updatedCoupon.active,
           once_per_cpf: updatedCoupon.oncePerCpf,
-          max_uses: updatedCoupon.maxUses ? parseInt(updatedCoupon.maxUses) : undefined
+          max_uses: updatedCoupon.maxUses ? parseInt(updatedCoupon.maxUses) : undefined,
+          minimum_purchase_amount: Math.max(0, parseFloat(updatedCoupon.minimumPurchaseAmount) || 0)
         };
 
         try {
@@ -111,7 +114,7 @@ export const useCouponStore = create(
         }
       },
 
-      validateCoupon: async (code, cpf) => {
+      validateCoupon: async (code, cpf, subtotal = 0) => {
         // Busca direto do banco — não depende do estado local (que pode estar vazio para clientes)
         const { data: couponData, error } = await supabase
           .from('coupons')
@@ -125,7 +128,8 @@ export const useCouponStore = create(
           ...couponData,
           usageCount: couponData.used_count,
           oncePerCpf: couponData.once_per_cpf,
-          maxUses: couponData.max_uses
+          maxUses: couponData.max_uses,
+          minimumPurchaseAmount: Number(couponData.minimum_purchase_amount) || 0
         };
 
         if (!coupon.active) return { valid: false, message: 'Este cupom está inativo.' };
@@ -135,6 +139,14 @@ export const useCouponStore = create(
 
         if (coupon.maxUses && coupon.usageCount >= coupon.maxUses) {
           return { valid: false, message: 'Este cupom atingiu o limite de usos.' };
+        }
+
+        if (Number(subtotal) < coupon.minimumPurchaseAmount) {
+          const minimum = coupon.minimumPurchaseAmount.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          });
+          return { valid: false, message: `Este cupom exige compra mínima de ${minimum}.` };
         }
 
         // Validação de uso único por CPF
@@ -155,26 +167,15 @@ export const useCouponStore = create(
         return { valid: true, coupon };
       },
 
-      redeemCoupon: async (code) => {
-        const { coupons } = get();
-        const coupon = coupons.find(c => c.code === code.toUpperCase());
-        if (!coupon) return;
-
+      redeemCoupon: async (orderId) => {
         try {
           const { error } = await supabase
-            .from('coupons')
-            .update({ used_count: coupon.usageCount + 1 })
-            .eq('id', coupon.id);
+            .rpc('redeem_coupon_for_order', { p_order_id: orderId });
 
           if (error) throw error;
-
-          set((state) => ({
-            coupons: state.coupons.map(c => 
-              c.id === coupon.id ? { ...c, usageCount: c.usageCount + 1 } : c
-            )
-          }));
         } catch (err) {
           console.error('Erro ao resgatar cupom no Supabase:', err);
+          throw err;
         }
       },
     })

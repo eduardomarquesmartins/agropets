@@ -109,7 +109,7 @@ function SearchPageRoute() {
 }
 
 function AppContent() {
-  const { user } = useAuthStore();
+  const { user, initialize } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const isVet = user?.role === 'vet';
   const { settings, fetchSettings } = useSettingsStore();
@@ -126,6 +126,10 @@ function AppContent() {
   const { fetchTransactions } = useFinancialStore();
   const { fetchLogs } = useInventoryStore();
   const { fetchAppointments } = useAppointmentStore();
+
+  React.useEffect(() => {
+    initialize();
+  }, [initialize]);
 
   React.useEffect(() => {
     fetchSettings();
