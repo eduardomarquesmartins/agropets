@@ -7,6 +7,7 @@ import { useCouponStore } from '../../store/couponStore';
 import { useBannerStore } from '../../store/bannerStore';
 import { useCustomerStore } from '../../store/customerStore';
 import { emailService } from '../../services/emailService';
+import { uploadMarketingImage } from '../../services/supabase';
 import toast from 'react-hot-toast';
 
 const MarketingManager = ({ openModal }) => {
@@ -43,6 +44,7 @@ const MarketingManager = ({ openModal }) => {
   const [promoEmailForm, setPromoEmailForm] = useState({ subject: '', content: '', images: [] });
   const [selectedPromoRecipients, setSelectedPromoRecipients] = useState([]);
   const [isSendingPromo, setIsSendingPromo] = useState(false);
+  const [isUploadingPromoImages, setIsUploadingPromoImages] = useState(false);
   const [promoSearch, setPromoSearch] = useState('');
 
   const handleSendPromoEmail = async () => {
@@ -71,17 +73,20 @@ const MarketingManager = ({ openModal }) => {
     }
   };
 
-  const handleImageUpload = (e, type) => {
+  const handleImageUpload = async (e, type) => {
     const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (type === 'promo') {
-          setPromoEmailForm(prev => ({ ...prev, images: [...prev.images, reader.result] }));
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    if (type !== 'promo' || files.length === 0) return;
+
+    setIsUploadingPromoImages(true);
+    try {
+      const urls = await Promise.all(files.map(uploadMarketingImage));
+      setPromoEmailForm(prev => ({ ...prev, images: [...prev.images, ...urls] }));
+    } catch (error) {
+      toast.error(error.message || 'Não foi possível enviar as imagens.');
+    } finally {
+      setIsUploadingPromoImages(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -236,8 +241,9 @@ const MarketingManager = ({ openModal }) => {
                   className="btn-secondary-modern" 
                   style={{ padding: '4px 12px', fontSize: '0.75rem', height: 'auto' }}
                   onClick={() => document.getElementById('promo-img-upload').click()}
+                  disabled={isUploadingPromoImages}
                 >
-                  <Upload size={14} /> Anexar Fotos
+                  <Upload size={14} /> {isUploadingPromoImages ? 'Enviando...' : 'Anexar Fotos'}
                 </button>
               </label>
               <input 

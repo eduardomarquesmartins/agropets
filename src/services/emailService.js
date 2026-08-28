@@ -157,9 +157,16 @@ export const emailService = {
   },
 
   sendPromotionalEmail: async (recipient, subject, content, images = []) => {
-    const imagesHtml = images.length > 0 
+    const publicImages = images.filter((image) => {
+      try {
+        return new URL(image).protocol === 'https:';
+      } catch {
+        return false;
+      }
+    });
+    const imagesHtml = publicImages.length > 0
       ? `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-          ${images.map(img => `<img src="${img}" style="width: 100%; border-radius: 8px;" />`).join('')}
+          ${publicImages.map(img => `<img src="${img}" alt="Oferta Agropets" style="width: 100%; border-radius: 8px;" />`).join('')}
          </div>`
       : '';
 

@@ -82,3 +82,38 @@ export const uploadBannerImage = async (file) => {
 
   return publicUrl;
 };
+
+/**
+ * Faz upload de uma imagem para campanhas de e-mail e retorna uma URL HTTPS pública.
+ * E-mails não devem usar imagens em Base64, pois provedores como Gmail as bloqueiam.
+ */
+export const uploadMarketingImage = async (file) => {
+  const client = requireSupabase();
+  const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+  const maxBytes = 5 * 1024 * 1024;
+
+  if (!file || !allowedTypes.has(file.type)) {
+    throw new Error('Formato não suportado. Use JPG, PNG, WEBP ou GIF.');
+  }
+  if (file.size > maxBytes) {
+    throw new Error('Cada imagem deve ter no máximo 5 MB.');
+  }
+
+  const extensionsByMimeType = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+  };
+  const nameExtension = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : null;
+  const extension = extensionsByMimeType[file.type] || nameExtension || 'img';
+  const path = `marketing-images/${crypto.randomUUID()}.${extension}`;
+  const { error } = await client.storage
+    .from('products')
+    .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type });
+
+  if (error) throw error;
+
+  const { data: { publicUrl } } = client.storage.from('products').getPublicUrl(path);
+  return publicUrl;
+};

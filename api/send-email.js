@@ -23,11 +23,12 @@ const setCorsHeaders = (req, res) => {
   res.setHeader('Vary', 'Origin');
 };
 
-const sanitizeHtml = (html) =>
+export const sanitizeHtml = (html) =>
   String(html || '')
     .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
     .replace(/\son\w+="[^"]*"/gi, '')
     .replace(/\son\w+='[^']*'/gi, '')
+    .replace(/\ssrc\s*=\s*(["'])data:[\s\S]*?\1/gi, '')
     .replace(/javascript:/gi, '');
 
 const isRateLimited = (key) => {
