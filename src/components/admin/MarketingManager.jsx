@@ -53,19 +53,29 @@ const MarketingManager = ({ openModal }) => {
     
     setIsSendingPromo(true);
     let successCount = 0;
+    let failureMessage = '';
     try {
       for (const customer of recipients) {
-        const ok = await emailService.sendPromotionalEmail(
+        const result = await emailService.sendPromotionalEmail(
           customer, 
           promoEmailForm.subject, 
           promoEmailForm.content, 
           promoEmailForm.images
         );
-        if (ok) successCount++;
+        if (result?.success) {
+          successCount++;
+        } else {
+          failureMessage = result?.error || 'Não foi possível enviar todos os e-mails.';
+          if (failureMessage.includes('sessão expirou')) break;
+        }
       }
-      toast.success(`${successCount} e-mails enviados com sucesso!`);
-      setPromoEmailForm({ subject: '', content: '', images: [] });
-      setSelectedPromoRecipients([]);
+      if (successCount === recipients.length) {
+        toast.success(`${successCount} e-mails enviados com sucesso!`);
+        setPromoEmailForm({ subject: '', content: '', images: [] });
+        setSelectedPromoRecipients([]);
+      } else {
+        toast.error(failureMessage || `${successCount} de ${recipients.length} e-mails foram enviados.`);
+      }
     } catch {
       toast.error('Ocorreu um erro ao enviar a campanha.');
     } finally {

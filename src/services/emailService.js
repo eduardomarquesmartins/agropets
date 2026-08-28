@@ -1,3 +1,38 @@
+let verifiedAccessToken = null;
+
+const getValidAccessToken = async (supabase) => {
+  let { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError || !session?.access_token) {
+    return { error: 'Sua sessão expirou. Entre novamente para enviar e-mails.' };
+  }
+
+  // Renova antes do envio quando o token está perto de expirar. Isso evita que
+  // uma sessão antiga em outro computador chegue inválida à API de e-mail.
+  if (session.expires_at && session.expires_at * 1000 <= Date.now() + 60_000) {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session?.access_token) {
+      await supabase.auth.signOut({ scope: 'local' });
+      verifiedAccessToken = null;
+      return { error: 'Sua sessão expirou. Entre novamente para enviar e-mails.' };
+    }
+    session = data.session;
+  }
+
+  // getSession lê o armazenamento local; getUser valida o token no servidor.
+  // Validamos uma vez por token e invalidamos o cache ao receber 401 da API.
+  if (verifiedAccessToken !== session.access_token) {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      await supabase.auth.signOut({ scope: 'local' });
+      verifiedAccessToken = null;
+      return { error: 'Sua sessão expirou. Entre novamente para enviar e-mails.' };
+    }
+    verifiedAccessToken = session.access_token;
+  }
+
+  return { accessToken: session.access_token };
+};
+
 const callEmailApi = async (payload) => {
   try {
     // Em produção (Vercel), usa a serverless function
@@ -30,8 +65,8 @@ const callEmailApi = async (payload) => {
 
     // Produção — usa a serverless function da Vercel
     const { supabase } = await import('./supabase');
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) return { success: false, error: 'Sessão expirada.' };
+    const { accessToken, error: sessionError } = await getValidAccessToken(supabase);
+    if (!accessToken) return { success: false, error: sessionError };
 
     // O domínio sem www redireciona para www na Vercel. Um redirect entre
     // origens remove o header Authorization por segurança, então a chamada
@@ -44,13 +79,18 @@ const callEmailApi = async (payload) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        await supabase.auth.signOut({ scope: 'local' });
+        verifiedAccessToken = null;
+        return { success: false, error: 'Sua sessão expirou. Entre novamente para enviar e-mails.' };
+      }
       console.error('Email API Error:', errorData.error, errorData.message, errorData.name);
       return { success: false, error: errorData.error || 'Failed to send email' };
     }
@@ -191,6 +231,6 @@ export const emailService = {
         </div>
       `
     });
-    return result.success;
+    return result;
   }
 };
