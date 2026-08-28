@@ -13,7 +13,7 @@ const callEmailApi = async (payload) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: payload.from || 'Agropets <onboarding@resend.dev>',
+          from: payload.from || 'Agropets <contato@agropetscao.com.br>',
           to: Array.isArray(payload.to) ? payload.to : [payload.to],
           subject: payload.subject,
           html: payload.html,
@@ -81,7 +81,7 @@ export const emailService = {
     `).join('');
 
     return await callEmailApi({
-      from: 'Agropets <onboarding@resend.dev>',
+      from: 'Agropets <contato@agropetscao.com.br>',
       to: [user.email],
       subject: `Pedido Confirmado #${order.id} - Agropets`,
       html: `
@@ -109,7 +109,7 @@ export const emailService = {
 
   sendAppointmentReminder: async (appointment, user) => {
     return await callEmailApi({
-      from: 'Veterinária Agropets <onboarding@resend.dev>',
+      from: 'Veterinária Agropets <contato@agropetscao.com.br>',
       to: [user.email],
       subject: `Lembrete de Consulta: ${appointment.petName} - Agropets`,
       html: `
@@ -136,7 +136,7 @@ export const emailService = {
     };
     
     return await callEmailApi({
-      from: 'Agropets <onboarding@resend.dev>',
+      from: 'Agropets <contato@agropetscao.com.br>',
       to: [user.email],
       subject: `Atualização do Pedido #${order.id} - Agropets`,
       html: `
@@ -162,7 +162,7 @@ export const emailService = {
       : '';
 
     const result = await callEmailApi({
-      from: 'Marketing Agropets <onboarding@resend.dev>',
+      from: 'Marketing Agropets <contato@agropetscao.com.br>',
       to: [recipient.email],
       kind: 'marketing',
       subject: subject,

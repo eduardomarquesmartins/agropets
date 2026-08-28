@@ -1,7 +1,7 @@
 const DEFAULT_SENDERS = new Set([
-  'Agropets <onboarding@resend.dev>',
-  'Veterinaria Agropets <onboarding@resend.dev>',
-  'Marketing Agropets <onboarding@resend.dev>',
+  'Agropets <contato@agropetscao.com.br>',
+  'Veterinária Agropets <contato@agropetscao.com.br>',
+  'Marketing Agropets <contato@agropetscao.com.br>',
 ]);
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     return res.status(error.statusCode || 401).json({ error: error.message });
   }
 
-  const sender = DEFAULT_SENDERS.has(from) ? from : 'Agropets <onboarding@resend.dev>';
+  const sender = DEFAULT_SENDERS.has(from) ? from : 'Agropets <contato@agropetscao.com.br>';
   const recipients = (Array.isArray(to) ? to : [to])
     .map((email) => String(email || '').trim().toLowerCase())
     .filter(Boolean);
