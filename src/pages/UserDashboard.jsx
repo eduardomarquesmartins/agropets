@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import './UserDashboard.css';
 
 const UserDashboard = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateProfile } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { wishlist, toggleWishlist } = useWishlistStore();
@@ -31,6 +31,9 @@ const UserDashboard = () => {
   
   const [userOrders, setUserOrders] = useState([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({});
 
   // Pet Modal State
   const [isPetModalOpen, setIsPetModalOpen] = useState(false);
@@ -55,6 +58,49 @@ const UserDashboard = () => {
     }
     fetchPets();
   }, [user, fetchUserOrders, fetchPets]);
+
+  useEffect(() => {
+    if (!isEditingProfile && user) {
+      setProfileForm({
+        name: user.name || '',
+        email: user.email || '',
+        whatsapp: user.phone || user.whatsapp || '',
+        cep: user.cep || '',
+        address: user.address || user.endereco || '',
+        number: user.number || '',
+        neighborhood: user.neighborhood || user.bairro || '',
+        city: user.location || user.city || '',
+        complement: user.complement || user.complemento || '',
+      });
+    }
+  }, [user, isEditingProfile]);
+
+  const handleProfileChange = (field, value) => {
+    setProfileForm((current) => ({ ...current, [field]: value }));
+  };
+
+  const handleProfileSubmit = async (event) => {
+    event.preventDefault();
+    if (!profileForm.name?.trim()) return toast.error('Informe seu nome completo.');
+
+    setIsSavingProfile(true);
+    try {
+      const emailChanged = profileForm.email.trim().toLowerCase() !== String(user.email || '').toLowerCase();
+      const updatedUser = await updateProfile(profileForm);
+      if (!updatedUser) throw new Error('Não foi possível salvar seus dados.');
+
+      setIsEditingProfile(false);
+      if (emailChanged && updatedUser.emailChangePending) {
+        toast.success('Dados salvos. Confirme a troca no e-mail enviado para o novo endereço.');
+      } else {
+        toast.success('Dados atualizados com sucesso!');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Não foi possível salvar seus dados.');
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   const handlePetSubmit = async (e) => {
     e.preventDefault();
@@ -249,36 +295,40 @@ const UserDashboard = () => {
         <p>Gerencie suas informações pessoais e visualize seus pets.</p>
       </div>
 
-      <div className="profile-grid-dashboard">
+      <form className="profile-grid-dashboard" onSubmit={handleProfileSubmit}>
         <div className="profile-section-card">
-          <h3 className="section-title-premium"><UserIcon size={18} /> Informações Básicas</h3>
+          <div className="profile-section-title-row">
+            <h3 className="section-title-premium"><UserIcon size={18} /> Informações Básicas</h3>
+            {!isEditingProfile && <button type="button" className="btn-edit-profile" onClick={() => setIsEditingProfile(true)}><Edit size={15} /> Editar dados</button>}
+          </div>
           <div className="user-form-group">
             <label>Nome Completo</label>
             <div className="input-with-icon-static">
               <UserIcon size={16} />
-              <input type="text" className="user-input-premium" disabled value={user.name || ''} />
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.name || ''} onChange={(e) => handleProfileChange('name', e.target.value)} required />
             </div>
           </div>
           <div className="user-form-group">
             <label>E-mail</label>
             <div className="input-with-icon-static">
               <Settings size={16} />
-              <input type="email" className="user-input-premium" disabled value={user.email || ''} />
+              <input type="email" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.email || ''} onChange={(e) => handleProfileChange('email', e.target.value)} required />
             </div>
+            {isEditingProfile && <small className="profile-field-hint">Ao alterar o e-mail, será necessário confirmá-lo antes da troca ser concluída.</small>}
           </div>
           <div className="profile-row-dash">
             <div className="user-form-group">
               <label>CPF</label>
               <div className="input-with-icon-static">
                 <Hash size={16} />
-                <input type="text" className="user-input-premium" disabled value={user.cpf || 'Não informado'} />
+                <input type="text" className="user-input-premium" disabled value={user.cpf || 'Não informado'} title="Para proteger sua identidade, o CPF não pode ser alterado pela conta." />
               </div>
             </div>
             <div className="user-form-group">
               <label>WhatsApp</label>
               <div className="input-with-icon-static">
                 <Phone size={16} />
-                <input type="text" className="user-input-premium" disabled value={user.phone || user.whatsapp || 'Não informado'} />
+                <input type="tel" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.whatsapp || ''} onChange={(e) => handleProfileChange('whatsapp', e.target.value)} placeholder="(00) 00000-0000" />
               </div>
             </div>
           </div>
@@ -290,32 +340,49 @@ const UserDashboard = () => {
             <label>CEP</label>
             <div className="input-with-icon-static">
               <Hash size={16} />
-              <input type="text" className="user-input-premium" disabled value={user.cep || 'Não informado'} />
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.cep || ''} onChange={(e) => handleProfileChange('cep', e.target.value)} placeholder="00000-000" />
             </div>
           </div>
           <div className="user-form-group">
             <label>Logradouro</label>
             <div className="input-with-icon-static">
               <MapPin size={16} />
-              <input type="text" className="user-input-premium" disabled value={`${user.address || user.endereco || ''}${user.number ? ', ' + user.number : ''}`} placeholder="Endereço não cadastrado" />
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.address || ''} onChange={(e) => handleProfileChange('address', e.target.value)} placeholder="Endereço não cadastrado" />
+            </div>
+          </div>
+          <div className="profile-row-dash">
+            <div className="user-form-group">
+              <label>Número</label>
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.number || ''} onChange={(e) => handleProfileChange('number', e.target.value)} placeholder="Número" />
+            </div>
+            <div className="user-form-group">
+              <label>Complemento</label>
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.complement || ''} onChange={(e) => handleProfileChange('complement', e.target.value)} placeholder="Apto, casa, bloco..." />
             </div>
           </div>
           <div className="profile-row-dash">
             <div className="user-form-group">
               <label>Bairro</label>
-              <input type="text" className="user-input-premium" disabled value={user.neighborhood || user.bairro || 'Não informado'} />
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.neighborhood || ''} onChange={(e) => handleProfileChange('neighborhood', e.target.value)} placeholder="Bairro" />
             </div>
             <div className="user-form-group">
               <label>Cidade</label>
-              <input type="text" className="user-input-premium" disabled value={user.location || user.city || 'Viamão - RS'} />
+              <input type="text" className="user-input-premium" disabled={!isEditingProfile} value={profileForm.city || ''} onChange={(e) => handleProfileChange('city', e.target.value)} placeholder="Cidade" />
             </div>
           </div>
         </div>
 
+        {isEditingProfile && (
+          <div className="profile-edit-actions full-width-card">
+            <button type="button" className="btn-cancel-user" onClick={() => setIsEditingProfile(false)} disabled={isSavingProfile}>Cancelar</button>
+            <button type="submit" className="btn-save-user" disabled={isSavingProfile}>{isSavingProfile ? 'Salvando...' : 'Salvar alterações'}</button>
+          </div>
+        )}
+
         <div className="profile-section-card full-width-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
             <h3 className="section-title-premium" style={{ margin: 0 }}><Dog size={18} /> Meus Pets</h3>
-            <button className="btn-add-pet-small" onClick={() => openPetModal()}>
+            <button type="button" className="btn-add-pet-small" onClick={() => openPetModal()}>
               <Plus size={14} /> Adicionar Pet
             </button>
           </div>
@@ -337,15 +404,15 @@ const UserDashboard = () => {
                     <span>{pet.type} • {pet.breed || 'SRD'}</span>
                   </div>
                   <div className="pet-dash-actions">
-                    <button onClick={() => openPetModal(pet)} title="Editar"><Edit size={14} /></button>
-                    <button onClick={() => handleDeletePet(pet.id)} title="Remover"><Trash2 size={14} /></button>
+                    <button type="button" onClick={() => openPetModal(pet)} title="Editar"><Edit size={14} /></button>
+                    <button type="button" onClick={() => handleDeletePet(pet.id)} title="Remover"><Trash2 size={14} /></button>
                   </div>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
+      </form>
     </div>
   );
 

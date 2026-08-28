@@ -406,6 +406,51 @@
   color: var(--brand-p);
 }
 
+.profile-section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.profile-section-title-row .section-title-premium {
+  margin-bottom: 1.5rem;
+}
+
+.btn-edit-profile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--brand-p);
+  background: white;
+  color: var(--brand-p);
+  border-radius: 10px;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-field-hint {
+  display: block;
+  margin-top: 0.4rem;
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.profile-edit-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.profile-edit-actions .btn-cancel-user,
+.profile-edit-actions .btn-save-user {
+  flex: 0 1 200px;
+}
+
 .input-with-icon-static {
   position: relative;
   display: flex;

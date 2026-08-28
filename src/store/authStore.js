@@ -57,6 +57,18 @@ const loadProfile = async (authUser) => {
 
   if (customerError) throw customerError;
   if (!customer) throw new Error('User profile was not provisioned.');
+
+  // A confirmação de troca de e-mail acontece no Auth. Quando ela for concluída,
+  // mantém o registro do cliente sincronizado com a fonte de identidade.
+  if (authUser.email && customer.email !== authUser.email) {
+    const { error: syncEmailError } = await supabase
+      .from('customers')
+      .update({ email: authUser.email })
+      .eq('auth_user_id', authUser.id);
+
+    if (!syncEmailError) customer.email = authUser.email;
+  }
+
   return mapCustomerFromDb(customer, authUser);
 };
 
@@ -141,15 +153,28 @@ export const useAuthStore = create((set, get) => ({
     if (!currentUser || !supabase) return null;
 
     try {
+      const nextEmail = String(data.email || '').trim().toLowerCase();
+      let emailChangePending = false;
+
       if (data.password) {
         const { error } = await supabase.auth.updateUser({ password: data.password });
         if (error) throw error;
       }
 
+      if (nextEmail && nextEmail !== String(currentUser.email || '').toLowerCase()) {
+        const { data: authData, error } = await supabase.auth.updateUser({ email: nextEmail });
+        if (error) throw error;
+        emailChangePending = authData.user?.email !== nextEmail;
+      }
+
       if (currentUser.role === 'customer') {
+        const customerData = mapCustomerToDb({ ...currentUser, ...data });
+        // Se a confirmação de e-mail estiver ativa, só atualizamos a tabela após
+        // o Auth confirmar a nova identidade no próximo carregamento da sessão.
+        if (nextEmail && !emailChangePending) customerData.email = nextEmail;
         const { error } = await supabase
           .from('customers')
-          .update(mapCustomerToDb({ ...currentUser, ...data }))
+          .update(customerData)
           .eq('auth_user_id', currentUser.authUserId);
         if (error) throw error;
       } else {
@@ -164,7 +189,7 @@ export const useAuthStore = create((set, get) => ({
       if (error || !authUser) throw error || new Error('Session expired.');
       const user = await loadProfile(authUser);
       set({ user });
-      return user;
+      return { ...user, emailChangePending };
     } catch (error) {
       console.error('Erro ao atualizar perfil:', error);
       return null;
