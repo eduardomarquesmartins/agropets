@@ -33,7 +33,14 @@ const callEmailApi = async (payload) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) return { success: false, error: 'Sessão expirada.' };
 
-    const response = await fetch('/api/send-email', {
+    // O domínio sem www redireciona para www na Vercel. Um redirect entre
+    // origens remove o header Authorization por segurança, então a chamada
+    // precisa ir diretamente ao domínio canônico nesses acessos legados.
+    const emailApiUrl = window.location.hostname === 'agropetscao.com.br'
+      ? 'https://www.agropetscao.com.br/api/send-email'
+      : '/api/send-email';
+
+    const response = await fetch(emailApiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

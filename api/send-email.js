@@ -8,6 +8,20 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const requestWindowMs = 60 * 1000;
 const requestLimit = 12;
 const requestLog = new Map();
+const allowedOrigins = new Set([
+  'https://agropetscao.com.br',
+  'https://www.agropetscao.com.br',
+]);
+
+const setCorsHeaders = (req, res) => {
+  const origin = req.headers?.origin;
+  if (!allowedOrigins.has(origin)) return;
+
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+  res.setHeader('Vary', 'Origin');
+};
 
 const sanitizeHtml = (html) =>
   String(html || '')
@@ -31,6 +45,12 @@ const isRateLimited = (key) => {
 };
 
 export default async function handler(req, res) {
+  setCorsHeaders(req, res);
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -46,6 +66,10 @@ export default async function handler(req, res) {
   try {
     user = await requireAuthenticatedUser(req);
   } catch (error) {
+    if (error.message === 'Supabase server credentials are not configured.') {
+      console.error('Supabase server credentials are not configured');
+      return res.status(500).json({ error: 'Mail server configuration error' });
+    }
     return res.status(error.statusCode || 401).json({ error: error.message });
   }
 
