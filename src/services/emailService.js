@@ -164,6 +164,7 @@ export const emailService = {
     const result = await callEmailApi({
       from: 'Marketing Agropets <onboarding@resend.dev>',
       to: [recipient.email],
+      kind: 'marketing',
       subject: subject,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">

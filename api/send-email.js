@@ -44,6 +44,11 @@ const isRateLimited = (key) => {
   return false;
 };
 
+export const isRecipientAllowed = ({ recipients, user, isMarketing }) =>
+  recipients.length === 1
+  && recipients.every((email) => emailRegex.test(email))
+  && (isMarketing || recipients[0] === user.email);
+
 export default async function handler(req, res) {
   setCorsHeaders(req, res);
 
@@ -55,7 +60,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { from, to, subject, html } = req.body || {};
+  const { from, to, subject, html, kind } = req.body || {};
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.error('RESEND_API_KEY is not defined');
@@ -64,7 +69,9 @@ export default async function handler(req, res) {
 
   let user;
   try {
-    user = await requireAuthenticatedUser(req);
+    user = kind === 'marketing'
+      ? await requireAdminUser(req)
+      : await requireAuthenticatedUser(req);
   } catch (error) {
     if (error.message === 'Supabase server credentials are not configured.') {
       console.error('Supabase server credentials are not configured');
@@ -84,7 +91,7 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many email requests. Try again later.' });
   }
 
-  if (recipients.length !== 1 || recipients[0] !== user.email || !recipients.every((email) => emailRegex.test(email))) {
+  if (!isRecipientAllowed({ recipients, user, isMarketing: kind === 'marketing' })) {
     return res.status(400).json({ error: 'Invalid recipient list' });
   }
 
@@ -120,4 +127,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
-import { requireAuthenticatedUser } from './_lib/requestAuth.js';
+import { requireAdminUser, requireAuthenticatedUser } from './_lib/requestAuth.js';
