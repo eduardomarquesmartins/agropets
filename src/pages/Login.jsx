@@ -11,12 +11,13 @@ import { validateCPF, formatCPF, formatPhone, validateCEP, formatCEP } from '../
 import './Login.css';
 
 const Login = () => {
-  const [step, setStep] = useState('selection'); // selection, signup, completion, forgot-password
+  const [step, setStep] = useState('selection'); // selection, signup, completion, forgot-password, claim-account
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isClaimingAccount, setIsClaimingAccount] = useState(false);
   const { login, signup, loginWithGoogle, updateProfile } = useAuthStore();
   const { settings } = useSettingsStore();
   const navigate = useNavigate();
@@ -95,6 +96,50 @@ const Login = () => {
       } else {
         toast.error('E-mail ou senha incorretos.');
       }
+    }
+  };
+
+  const redirectLoggedUser = (loggedUser) => {
+    if (loggedUser.role === 'admin') {
+      navigate('/admin');
+    } else if (loggedUser.role === 'vet') {
+      navigate('/vet');
+    } else if (!loggedUser.isProfileComplete) {
+      setStep('completion');
+    } else {
+      navigate(redirectPath);
+    }
+  };
+
+  const handleClaimAccount = async (e) => {
+    e.preventDefault();
+    const phone = profileData.whatsapp.replace(/\D/g, '');
+
+    if (!email || phone.length < 10 || password.length < 12) {
+      toast.error('Informe o e-mail, telefone cadastrado e uma senha de pelo menos 12 caracteres.');
+      return;
+    }
+
+    setIsClaimingAccount(true);
+    try {
+      const response = await fetch('/api/claim-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, phone, password }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || 'Não foi possível ativar a conta.');
+      }
+
+      const loggedUser = await login(email, password);
+      if (!loggedUser) throw new Error('Conta ativada, mas não foi possível iniciar a sessão. Tente entrar novamente.');
+      toast.success('Senha criada e conta ativada com sucesso!');
+      redirectLoggedUser(loggedUser);
+    } catch (error) {
+      toast.error(error.message || 'Não foi possível ativar a conta.');
+    } finally {
+      setIsClaimingAccount(false);
     }
   };
 
@@ -179,6 +224,8 @@ const Login = () => {
                 ? 'Preencha os dados abaixo para começar sua jornada na Agropets.'
                 : step === 'forgot-password'
                 ? 'Informe seu e-mail para receber as instruções de recuperação.'
+                : step === 'claim-account'
+                ? 'Confirme o telefone do cadastro e defina sua nova senha. Não enviaremos e-mail.'
                 : 'Acesse sua conta para realizar um pedido.'}
             </p>
           </div>
@@ -271,6 +318,7 @@ const Login = () => {
 
               <div className="login-footer">
                 <p>Não tem uma conta? <button className="btn-link" onClick={() => setStep('signup')}>Cadastre-se</button></p>
+                <p>Já possui cadastro? <button className="btn-link" onClick={() => setStep('claim-account')}>Ative seu acesso</button></p>
               </div>
             </>
           ) : step === 'signup' ? (
@@ -447,6 +495,63 @@ const Login = () => {
 
               <div className="login-footer">
                 <p>Lembrou a senha? <button className="btn-link" onClick={() => setStep('selection')}>Voltar para Login</button></p>
+              </div>
+            </>
+          ) : step === 'claim-account' ? (
+            <>
+              <form className="login-form fade-in" onSubmit={handleClaimAccount}>
+                <div className="input-group">
+                  <label><Mail size={18} /> E-mail cadastrado</label>
+                  <input
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    value={email || ''}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label><Phone size={18} /> Telefone cadastrado</label>
+                  <input
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={profileData.whatsapp || ''}
+                    onChange={e => setProfileData({ ...profileData, whatsapp: formatPhone(e.target.value) })}
+                    required
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label><Lock size={18} /> Crie uma senha</label>
+                  <div className="password-input-wrapper" style={{ position: 'relative' }}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Mínimo de 12 caracteres"
+                      value={password || ''}
+                      onChange={e => setPassword(e.target.value)}
+                      minLength="12"
+                      required
+                      style={{ paddingRight: '45px' }}
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle-btn"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </div>
+
+                <button type="submit" className="btn-login" disabled={isClaimingAccount}>
+                  {isClaimingAccount ? 'Ativando...' : 'Criar senha e entrar'} <ArrowRight size={18} />
+                </button>
+              </form>
+
+              <div className="login-footer">
+                <p>Já criou sua senha? <button className="btn-link" onClick={() => setStep('selection')}>Fazer Login</button></p>
               </div>
             </>
           ) : (
