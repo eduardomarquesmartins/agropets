@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 
@@ -13,6 +13,7 @@ import MobileNavbar from './components/MobileNavbar';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import CartQuickFinish from './components/CartQuickFinish';
 import ProtectedRoute from './components/ProtectedRoute';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
 import './App.css';
 
@@ -32,16 +33,16 @@ import { useFinancialStore } from './store/financialStore';
 import { useInventoryStore } from './store/inventoryStore';
 import { useAppointmentStore } from './store/appointmentStore';
 
-const Cart = lazy(() => import('./pages/Cart'));
-const Login = lazy(() => import('./pages/Login'));
-const UserDashboard = lazy(() => import('./pages/UserDashboard'));
-const CategoryPage = lazy(() => import('./pages/CategoryPage'));
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
-const Checkout = lazy(() => import('./pages/Checkout'));
-const ProductDetail = lazy(() => import('./pages/ProductDetail'));
-const VetDashboard = lazy(() => import('./pages/VetDashboard'));
-const Institutional = lazy(() => import('./pages/Institutional'));
-const SearchPage = lazy(() => import('./pages/SearchPage'));
+const Cart = lazyWithRetry(() => import('./pages/Cart'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const UserDashboard = lazyWithRetry(() => import('./pages/UserDashboard'));
+const CategoryPage = lazyWithRetry(() => import('./pages/CategoryPage'));
+const AdminDashboard = lazyWithRetry(() => import('./pages/AdminDashboard'));
+const Checkout = lazyWithRetry(() => import('./pages/Checkout'));
+const ProductDetail = lazyWithRetry(() => import('./pages/ProductDetail'));
+const VetDashboard = lazyWithRetry(() => import('./pages/VetDashboard'));
+const Institutional = lazyWithRetry(() => import('./pages/Institutional'));
+const SearchPage = lazyWithRetry(() => import('./pages/SearchPage'));
 
 function Home() {
   const searchQuery = useSearchStore((state) => state.searchQuery);
