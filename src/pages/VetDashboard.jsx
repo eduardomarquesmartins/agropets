@@ -165,7 +165,11 @@ const VetDashboard = () => {
     
     const loadingToast = toast.loading('Enviando lembrete...');
     try {
-      await emailService.sendAppointmentReminder(app, { name: app.customerName || app.ownerName, email: app.email });
+      const result = await emailService.sendAppointmentReminder(app, { name: app.customerName || app.ownerName, email: app.email });
+      if (!result?.success) {
+        toast.error(result?.error || 'Não foi possível enviar o lembrete.', { id: loadingToast });
+        return;
+      }
       toast.success('Lembrete enviado com sucesso!', { id: loadingToast });
     } catch {
       toast.error('Erro ao enviar lembrete.', { id: loadingToast });

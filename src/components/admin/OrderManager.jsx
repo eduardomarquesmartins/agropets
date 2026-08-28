@@ -17,8 +17,12 @@ const OrderManager = () => {
       await updateOrderStatus(orderId, newStatus);
       const order = orders.find(o => o.id === orderId);
       if (order && order.email) {
-        await emailService.sendDeliveryStatusUpdate(order, { name: order.customer_name, email: order.email }, newStatus);
-        toast.success(`E-mail de atualização enviado para ${order.customer_name}`, { id: toastId });
+        const result = await emailService.sendDeliveryStatusUpdate(order, { name: order.customer_name, email: order.email }, newStatus);
+        if (result?.success) {
+          toast.success(`E-mail de atualização enviado para ${order.customer_name}`, { id: toastId });
+        } else {
+          toast.error('Status atualizado, mas o e-mail não foi enviado.', { id: toastId });
+        }
       } else {
         toast.success('Status atualizado!', { id: toastId });
       }

@@ -111,6 +111,7 @@ export const emailService = {
     return await callEmailApi({
       from: 'Veterinária Agropets <contato@agropetscao.com.br>',
       to: [user.email],
+      kind: 'staff-notification',
       subject: `Lembrete de Consulta: ${appointment.petName} - Agropets`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">
@@ -138,6 +139,7 @@ export const emailService = {
     return await callEmailApi({
       from: 'Agropets <contato@agropetscao.com.br>',
       to: [user.email],
+      kind: 'staff-notification',
       subject: `Atualização do Pedido #${order.id} - Agropets`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px;">

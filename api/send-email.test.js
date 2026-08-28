@@ -10,6 +10,14 @@ test('permite campanha para cliente somente quando o solicitante é administrado
   assert.equal(isRecipientAllowed({ recipients, user, isMarketing: true }), true);
 });
 
+test('permite aviso transacional para cliente somente quando solicitado pela equipe', () => {
+  const recipients = ['cliente@exemplo.com'];
+  const user = { email: 'veterinaria@agropets.com.br' };
+
+  assert.equal(isRecipientAllowed({ recipients, user, isMarketing: false, isStaffNotification: false }), false);
+  assert.equal(isRecipientAllowed({ recipients, user, isMarketing: false, isStaffNotification: true }), true);
+});
+
 test('mantém notificações comuns restritas ao e-mail do usuário autenticado', () => {
   assert.equal(isRecipientAllowed({
     recipients: ['cliente@exemplo.com'],

@@ -44,10 +44,10 @@ const isRateLimited = (key) => {
   return false;
 };
 
-export const isRecipientAllowed = ({ recipients, user, isMarketing }) =>
+export const isRecipientAllowed = ({ recipients, user, isMarketing, isStaffNotification }) =>
   recipients.length === 1
   && recipients.every((email) => emailRegex.test(email))
-  && (isMarketing || recipients[0] === user.email);
+  && (isMarketing || isStaffNotification || recipients[0] === user.email);
 
 export default async function handler(req, res) {
   setCorsHeaders(req, res);
@@ -69,9 +69,13 @@ export default async function handler(req, res) {
 
   let user;
   try {
-    user = kind === 'marketing'
-      ? await requireAdminUser(req)
-      : await requireAuthenticatedUser(req);
+    if (kind === 'marketing') {
+      user = await requireAdminUser(req);
+    } else if (kind === 'staff-notification') {
+      user = await requireStaffUser(req);
+    } else {
+      user = await requireAuthenticatedUser(req);
+    }
   } catch (error) {
     if (error.message === 'Supabase server credentials are not configured.') {
       console.error('Supabase server credentials are not configured');
@@ -91,7 +95,12 @@ export default async function handler(req, res) {
     return res.status(429).json({ error: 'Too many email requests. Try again later.' });
   }
 
-  if (!isRecipientAllowed({ recipients, user, isMarketing: kind === 'marketing' })) {
+  if (!isRecipientAllowed({
+    recipients,
+    user,
+    isMarketing: kind === 'marketing',
+    isStaffNotification: kind === 'staff-notification',
+  })) {
     return res.status(400).json({ error: 'Invalid recipient list' });
   }
 
@@ -127,4 +136,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Internal server error' });
   }
 }
-import { requireAdminUser, requireAuthenticatedUser } from './_lib/requestAuth.js';
+import { requireAdminUser, requireAuthenticatedUser, requireStaffUser } from './_lib/requestAuth.js';

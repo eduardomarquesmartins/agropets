@@ -9,7 +9,7 @@ import { useCategoryStore } from '../../store/categoryStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useInventoryStore } from '../../store/inventoryStore';
 import { useAuthStore } from '../../store/authStore';
-import { uploadProductImage } from '../../services/supabase';
+import { supabase, uploadProductImage } from '../../services/supabase';
 import { slugify, capitalizeTitle } from '../../utils/stringUtils';
 import toast from 'react-hot-toast';
 
@@ -194,10 +194,16 @@ const InventoryManager = ({ openModal, editingItem, setEditingItem, isEditingPro
 
     setIsGenerating(true);
     try {
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session?.access_token) {
+        throw new Error('Sua sessão expirou. Entre novamente para gerar a descrição.');
+      }
+
       const response = await fetch('/api/generate-product-description', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
           name,
@@ -208,17 +214,15 @@ const InventoryManager = ({ openModal, editingItem, setEditingItem, isEditingPro
         })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setProductForm({ ...productForm, description: data.html });
-        toast.success('Descrição gerada com IA!');
-      } else {
-        const dynamicContent = `<h3>O seu pet merece a excelência da <strong>${brand || 'Agropets'}</strong></h3><p>Proporcione o que há de melhor para o seu companheiro com o <strong>${name}</strong>.</p>`;
-        setProductForm({ ...productForm, description: dynamicContent });
-        toast.success('Conteúdo estruturado aplicado!');
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.html) {
+        throw new Error(data.error || 'Não foi possível gerar a descrição com IA.');
       }
-    } catch {
-      toast.error('Erro na geração IA. Tente novamente.');
+
+      setProductForm({ ...productForm, description: data.html });
+      toast.success('Descrição gerada com IA!');
+    } catch (error) {
+      toast.error(error.message || 'Erro na geração IA. Tente novamente.');
     } finally {
       setIsGenerating(false);
     }
@@ -1002,4 +1006,3 @@ const InventoryManager = ({ openModal, editingItem, setEditingItem, isEditingPro
 };
 
 export default InventoryManager;
-
