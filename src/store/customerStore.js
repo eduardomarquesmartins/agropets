@@ -10,15 +10,28 @@ export const useCustomerStore = create(
     fetchCustomers: async () => {
       set({ isLoading: true });
       try {
-        const { data, error } = await supabase
-          .from('customers')
-          .select('id, name, email, phone, cpf, birth_date, location, neighborhood, address, number, cep, complement, pet_type, created_at')
-          .order('name');
+        const [customersResult, staffResult] = await Promise.all([
+          supabase
+            .from('customers')
+            .select('id, auth_user_id, name, email, phone, cpf, birth_date, location, neighborhood, address, number, cep, complement, pet_type, created_at')
+            .order('name'),
+          supabase
+            .from('admin_users')
+            .select('auth_user_id, email'),
+        ]);
 
-        if (error) throw error;
+        if (customersResult.error) throw customersResult.error;
+        if (staffResult.error) throw staffResult.error;
 
-        if (data) {
-          const mapped = data.map(c => ({
+        if (customersResult.data) {
+          const staffAuthUserIds = new Set((staffResult.data || []).map((staff) => staff.auth_user_id).filter(Boolean));
+          const staffEmails = new Set((staffResult.data || []).map((staff) => String(staff.email || '').trim().toLowerCase()).filter(Boolean));
+          const customerAccounts = customersResult.data.filter((customer) => (
+            !staffAuthUserIds.has(customer.auth_user_id)
+            && !staffEmails.has(String(customer.email || '').trim().toLowerCase())
+          ));
+
+          const mapped = customerAccounts.map(c => ({
             ...c,
             whatsapp: c.phone,
             birthDate: c.birth_date,
