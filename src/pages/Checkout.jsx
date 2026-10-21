@@ -265,8 +265,12 @@ const Checkout = () => {
           productId: i.id,
           name: i.name + (i.selectedVariation ? ` (${i.selectedVariation.weight})` : ''),
           qty: i.quantity,
-          price: i.price,
-          selectedWeight: i.selectedVariation?.weight || null
+          price: i.selectedVariation?.price ?? i.price,
+          // A opção base usa o estoque geral do produto; só variações adicionais
+          // devem ser reservadas pelo peso dentro de products.variations.
+          selectedWeight: i.selectedVariation && !i.selectedVariation.isBase
+            ? i.selectedVariation.weight
+            : null
         })),
         subtotal,
         deliveryFee: selectedFee,
