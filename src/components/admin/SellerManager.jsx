@@ -287,7 +287,7 @@ const SellerManager = () => {
               </label>
               <label className="seller-field">
                 <span>{editing ? 'Nova senha' : 'Senha temporária'}</span>
-                <input required={!editing} minLength={editing && !form.password ? undefined : 12} type="password" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={editing ? 'Deixe vazio para manter' : 'Mínimo de 12 caracteres'} />
+                <input required={!editing} minLength={editing && !form.password ? undefined : 8} type="password" autoComplete="new-password" value={form.password} onChange={(event) => setForm({ ...form, password: event.target.value })} placeholder={editing ? 'Deixe vazio para manter' : 'Mínimo de 8 caracteres'} />
                 {!editing && <small>O vendedor poderá usar esta senha para entrar no painel.</small>}
               </label>
               <div className="seller-auto-link-note"><Link2 size={18} /><span><strong>Link automático</strong>Será criado junto com o vendedor e copiado ao concluir. O cliente só precisa abrir o link para a venda ser atribuída.</span></div>

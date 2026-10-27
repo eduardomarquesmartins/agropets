@@ -7,8 +7,8 @@ const allowedStatuses = new Set(['active', 'inactive']);
 const cleanEmail = (value) => String(value || '').trim().toLowerCase();
 
 const requirePassword = (value) => {
-  if (typeof value !== 'string' || value.length < 12) {
-    const error = new Error('Password must have at least 12 characters.');
+  if (typeof value !== 'string' || value.length < 8) {
+    const error = new Error('Password must have at least 8 characters.');
     error.statusCode = 400;
     throw error;
   }
@@ -149,3 +149,4 @@ export default async function handler(req, res) {
     return res.status(error.statusCode || 500).json({ error: error.message || 'Internal server error' });
   }
 }
+

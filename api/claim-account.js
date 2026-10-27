@@ -32,7 +32,7 @@ export const createClaimAccountHandler = ({ getClient = getSupabaseServerClient,
   const email = normalizeEmail(req.body?.email);
   const phone = normalizePhone(req.body?.phone);
   const password = String(req.body?.password || '');
-  if (!emailRegex.test(email) || phone.length < 10 || password.length < 12) return invalidClaim(res);
+  if (!emailRegex.test(email) || phone.length < 10 || password.length < 8) return invalidClaim(res);
 
   try {
     const client = getClient();
@@ -56,3 +56,4 @@ export const createClaimAccountHandler = ({ getClient = getSupabaseServerClient,
 };
 
 export default createClaimAccountHandler();
+

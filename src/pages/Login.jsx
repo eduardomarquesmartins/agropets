@@ -124,8 +124,8 @@ const Login = () => {
     e.preventDefault();
     const phone = profileData.whatsapp.replace(/\D/g, '');
 
-    if (!email || phone.length < 10 || password.length < 12) {
-      toast.error('Informe o e-mail, telefone cadastrado e uma senha de pelo menos 12 caracteres.');
+    if (!email || phone.length < 10 || password.length < 8) {
+      toast.error('Informe o e-mail, telefone cadastrado e uma senha de pelo menos 8 caracteres.');
       return;
     }
 
@@ -156,6 +156,11 @@ const Login = () => {
     e.preventDefault();
     if (!name || !email || !password) {
       toast.error('Por favor, preencha todos os campos básicos.');
+      return;
+    }
+
+    if (password.length < 8) {
+      toast.error('A senha deve ter pelo menos 8 caracteres.');
       return;
     }
 
@@ -362,6 +367,7 @@ const Login = () => {
                         placeholder="••••••••" 
                         value={password}
                         onChange={e => setPassword(e.target.value)}
+                        minLength={8}
                         required
                         style={{ paddingRight: '45px' }}
                       />
@@ -535,10 +541,10 @@ const Login = () => {
                   <div className="password-input-wrapper" style={{ position: 'relative' }}>
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Mínimo de 12 caracteres"
+                      placeholder="Mínimo de 8 caracteres"
                       value={password || ''}
                       onChange={e => setPassword(e.target.value)}
-                      minLength="12"
+                      minLength="8"
                       required
                       style={{ paddingRight: '45px' }}
                     />
