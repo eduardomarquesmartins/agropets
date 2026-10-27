@@ -12,8 +12,8 @@ const getDisplayOrderNumber = (orderNumber) => {
   const fullNumber = String(orderNumber || '').trim();
   const normalizedId = fullNumber.replace(/^#?PED-/i, '').replace(/-/g, '').toUpperCase();
 
-  if (/^[0-9A-F]{32}$/.test(normalizedId)) return `PED-${normalizedId.slice(0, 10)}`;
-  if (fullNumber.length > 18) return `${fullNumber.slice(0, 12)}…${fullNumber.slice(-4)}`;
+  if (/^[0-9A-F]{32}$/.test(normalizedId)) return normalizedId.slice(0, 8);
+  if (fullNumber.length > 8) return fullNumber.replace(/^#?PED-/i, '').slice(0, 8).toUpperCase();
   return fullNumber;
 };
 
