@@ -15,60 +15,63 @@ const readJsonBody = async (req) => {
   return rawBody ? JSON.parse(rawBody) : {};
 };
 
+const localApiHandlers = {
+  '/api/admin-users': './api/admin-users.js',
+  '/api/claim-account': './api/claim-account.js',
+  '/api/checkout-order-cleanup': './api/checkout-order-cleanup.js',
+  '/api/generate-product-description': './api/generate-product-description.js',
+  '/api/seller-commission-payouts': './api/seller-commission-payouts.js',
+  '/api/send-email': './api/send-email.js',
+  '/api/tef-payment': './api/tef-payment.js',
+};
+
+const createLocalApiMiddleware = (handlerPath) => async (req, res) => {
+  try {
+    req.body = await readJsonBody(req);
+  } catch {
+    res.statusCode = 400;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Corpo da requisição JSON inválido.' }));
+    return;
+  }
+
+  const response = {
+    status(code) {
+      res.statusCode = code;
+      return this;
+    },
+    json(payload) {
+      if (!res.headersSent) res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(payload));
+    },
+    setHeader(name, value) {
+      res.setHeader(name, value);
+      return this;
+    },
+    end(body) {
+      res.end(body);
+    },
+  };
+
+  try {
+    const { default: handler } = await import(handlerPath);
+    await handler(req, response);
+    if (!res.writableEnded) res.end();
+  } catch (error) {
+    console.error(`Local API error (${handlerPath}):`, error);
+    if (!res.writableEnded) {
+      res.statusCode = error.statusCode || 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: error.message || 'Internal server error' }));
+    }
+  }
+};
+
 const localApiPlugin = () => ({
   name: 'local-api',
   configureServer(server) {
-    server.middlewares.use('/api/tef-payment', async (req, res) => {
-      req.body = await readJsonBody(req).catch(() => ({}));
-
-      const response = {
-        statusCode: 200,
-        status(code) {
-          this.statusCode = code;
-          return this;
-        },
-        json(payload) {
-          res.statusCode = this.statusCode;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(payload));
-        },
-      };
-
-      const { default: tefPaymentHandler } = await import('./api/tef-payment.js');
-      await tefPaymentHandler(req, response);
-    });
-
-    server.middlewares.use('/api/admin-users', async (req, res) => {
-      req.body = await readJsonBody(req).catch(() => ({}));
-
-      const response = {
-        statusCode: 200,
-        status(code) {
-          this.statusCode = code;
-          return this;
-        },
-        json(payload) {
-          res.statusCode = this.statusCode;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(payload));
-        },
-        end() {
-          res.statusCode = this.statusCode;
-          res.end();
-        },
-      };
-
-      try {
-        const { default: adminUsersHandler } = await import('./api/admin-users.js');
-        await adminUsersHandler(req, response);
-      } catch (error) {
-        console.error('Local admin-users API error:', error);
-        if (!res.writableEnded) {
-          res.statusCode = error.statusCode || 500;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: error.message || 'Internal server error' }));
-        }
-      }
+    Object.entries(localApiHandlers).forEach(([route, handlerPath]) => {
+      server.middlewares.use(route, createLocalApiMiddleware(handlerPath));
     });
   },
 });
@@ -81,3 +84,4 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), localApiPlugin()],
   };
 })
+

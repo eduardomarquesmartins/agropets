@@ -58,9 +58,11 @@ const Hero = () => {
                       >
                         <h2>{banner.title}</h2>
                         <p>{banner.subtitle}</p>
-                        <Link to={banner.link || '#'} className="slide-btn">
-                          {banner.buttonText || 'Ver Detalhes'} <ArrowRight size={18} />
-                        </Link>
+                        {banner.link?.trim() && (
+                          <Link to={banner.link.trim()} className="slide-btn">
+                            {banner.buttonText || 'Ver Detalhes'} <ArrowRight size={18} />
+                          </Link>
+                        )}
                       </motion.div>
                     </div>
                   </div>
@@ -98,3 +100,4 @@ const Hero = () => {
 
 
 export default Hero;
+

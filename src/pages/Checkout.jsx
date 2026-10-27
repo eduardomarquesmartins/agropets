@@ -323,7 +323,26 @@ const Checkout = () => {
 
       // 2. A reserva e o log de estoque ocorrem em uma única transação no banco.
       const { error: stockError } = await supabase.rpc('reserve_order_stock', { p_order_id: savedOrder.id });
-      if (stockError) throw stockError;
+      if (stockError) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const cleanupResponse = await fetch('/api/checkout-order-cleanup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ order_id: savedOrder.id }),
+        });
+        const cleanupResult = await cleanupResponse.json().catch(() => ({}));
+
+        if (cleanupResponse.ok) {
+          toast.error('O estoque mudou durante a compra. O pedido incompleto foi removido; revise o carrinho e tente novamente.');
+        } else {
+          console.error('Não foi possível remover o pedido após falha na reserva:', cleanupResult);
+          toast.error(`O pedido ${orderData.id} foi registrado, mas não conseguimos confirmar o estoque. Não tente novamente; entre em contato com a loja.`);
+        }
+        return;
+      }
 
       clearSellerReferral();
 
@@ -690,3 +709,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

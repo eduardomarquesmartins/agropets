@@ -74,7 +74,12 @@ const Login = () => {
       return;
     }
 
-    await updateProfile(profileData);
+    const updatedProfile = await updateProfile(profileData);
+    if (!updatedProfile) {
+      toast.error('Não foi possível salvar seus dados. Confira sua conexão e tente novamente.');
+      return;
+    }
+
     toast.success('Cadastro finalizado com sucesso!');
     navigate(redirectPath);
   };
@@ -667,3 +672,4 @@ const Login = () => {
 };
 
 export default Login;
+
