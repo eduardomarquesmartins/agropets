@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Copy, Link2, Plus, RefreshCw, Search, Users, X } from 'lucide-react';
+import { Copy, Link2, Plus, RefreshCw, Search, Trash2, Users, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAdminUserStore } from '../../store/adminUserStore';
 import { useOrderStore } from '../../store/orderStore';
@@ -15,12 +15,13 @@ const getSellerLink = (seller) => {
 };
 
 const SellerManager = () => {
-  const { adminUsers, addAdminUser, updateAdminUser, toggleUserStatus, isLoading } = useAdminUserStore();
+  const { adminUsers, addAdminUser, updateAdminUser, deleteAdminUser, toggleUserStatus, isLoading } = useAdminUserStore();
   const { orders, fetchOrders, updateCommissionStatus } = useOrderStore();
   const [search, setSearch] = useState('');
   const [editing, setEditing] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deletingSellerId, setDeletingSellerId] = useState(null);
   const [form, setForm] = useState({ name: '', email: '', password: '', commission_rate: 10 });
   const sellers = adminUsers.filter((member) => member.role === 'seller');
 
@@ -82,6 +83,24 @@ const SellerManager = () => {
     }
   };
 
+  const removeSeller = async (seller) => {
+    if (seller.orderCount > 0) {
+      toast.error('Vendedor com vendas no histórico deve ser inativado.');
+      return;
+    }
+    if (!window.confirm(`Remover permanentemente ${seller.name}? A conta de acesso será excluída.`)) return;
+
+    setDeletingSellerId(seller.id);
+    try {
+      await deleteAdminUser(seller.id);
+      toast.success('Vendedor removido.');
+    } catch (error) {
+      toast.error(error.message || 'Não foi possível remover o vendedor.');
+    } finally {
+      setDeletingSellerId(null);
+    }
+  };
+
   const refresh = async () => {
     const { fetchAdminUsers } = useAdminUserStore.getState();
     await Promise.all([fetchAdminUsers(), fetchOrders()]);
@@ -131,6 +150,16 @@ const SellerManager = () => {
                   <td><div className="action-buttons-modern">
                     <button className="btn-action-outline btn-action-text edit" title="Editar vendedor" onClick={() => openForm(seller)}>Editar</button>
                     <button className="btn-action-outline btn-action-text" title={seller.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => toggleUserStatus(seller.id)}>{seller.status === 'active' ? 'Pausar' : 'Ativar'}</button>
+                    <button
+                      className="btn-action-outline btn-action-text seller-remove-action"
+                      title={seller.orderCount > 0 ? 'Inative o vendedor para preservar o histórico de vendas.' : 'Remover vendedor permanentemente'}
+                      aria-label={`Remover vendedor ${seller.name}`}
+                      disabled={seller.orderCount > 0 || deletingSellerId === seller.id}
+                      onClick={() => removeSeller(seller)}
+                    >
+                      <Trash2 size={14} />
+                      {deletingSellerId === seller.id ? 'Removendo...' : 'Remover'}
+                    </button>
                   </div></td>
                 </tr>
               ))}

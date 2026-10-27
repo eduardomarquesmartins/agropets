@@ -126,7 +126,16 @@ export default async function handler(req, res) {
         .eq('id', id)
         .single();
       if (error || !data) return res.status(404).json({ error: 'Team member not found.' });
-      if (data.role === 'seller') return res.status(409).json({ error: 'Desative o vendedor para manter o histórico de vendas e comissões.' });
+      if (data.role === 'seller') {
+        const { count, error: ordersError } = await client
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .eq('seller_id', id);
+        if (ordersError) throw ordersError;
+        if (count > 0) {
+          return res.status(409).json({ error: 'Este vendedor possui vendas no histórico. Inative-o para preservar as comissões e os pedidos.' });
+        }
+      }
       const { error: deleteProfileError } = await client.from('admin_users').delete().eq('id', id);
       if (deleteProfileError) throw deleteProfileError;
       const { error: deleteAuthError } = await client.auth.admin.deleteUser(data.auth_user_id);
