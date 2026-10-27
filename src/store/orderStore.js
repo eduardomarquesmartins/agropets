@@ -64,7 +64,11 @@ export const useOrderStore = create(
       if (!order) return;
 
       // Atualização otimista
-      set({ orders: orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o) });
+      set({ orders: orders.map(o => o.id === orderId ? {
+        ...o,
+        status: newStatus,
+        ...(newStatus === 'Cancelado' ? { commission_status: 'cancelled' } : {}),
+      } : o) });
 
       try {
         const { error } = await supabase
@@ -85,6 +89,26 @@ export const useOrderStore = create(
       } catch (error) {
         console.error('Erro na atualização do pedido:', error);
         toast.error('Erro ao sincronizar status.');
+        get().fetchOrders();
+      }
+    },
+
+    updateCommissionStatus: async (orderId, commissionStatus) => {
+      const { orders } = get();
+      const order = orders.find((item) => item.id === orderId);
+      if (!order || !['pending', 'paid'].includes(commissionStatus)) return;
+
+      set({ orders: orders.map((item) => item.id === orderId ? { ...item, commission_status: commissionStatus } : item) });
+      try {
+        const { error } = await supabase
+          .from('orders')
+          .update({ commission_status: commissionStatus })
+          .eq('id', orderId);
+        if (error) throw error;
+        toast.success(commissionStatus === 'paid' ? 'Comissão marcada como paga.' : 'Comissão voltou para pendente.');
+      } catch (error) {
+        console.error('Erro ao atualizar comissão:', error);
+        toast.error('Erro ao atualizar o pagamento da comissão.');
         get().fetchOrders();
       }
     },

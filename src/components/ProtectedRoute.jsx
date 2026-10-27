@@ -6,6 +6,7 @@ const getDefaultPathForUser = (user) => {
   if (!user) return '/';
   if (user.role === 'admin') return '/admin';
   if (user.role === 'vet') return '/vet';
+  if (user.role === 'seller') return '/vendedor';
   return '/';
 };
 

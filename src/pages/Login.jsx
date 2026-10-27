@@ -88,6 +88,8 @@ const Login = () => {
           navigate('/admin');
         } else if (loggedUser.role === 'vet') {
           navigate('/vet');
+        } else if (loggedUser.role === 'seller') {
+          navigate('/vendedor');
         } else if (!loggedUser.isProfileComplete) {
           setStep('completion');
         } else {
@@ -104,6 +106,8 @@ const Login = () => {
       navigate('/admin');
     } else if (loggedUser.role === 'vet') {
       navigate('/vet');
+    } else if (loggedUser.role === 'seller') {
+      navigate('/vendedor');
     } else if (!loggedUser.isProfileComplete) {
       setStep('completion');
     } else {

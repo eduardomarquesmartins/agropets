@@ -39,7 +39,7 @@ const clearAllStores = () => {
 const loadProfile = async (authUser) => {
   const { data: staff, error: staffError } = await supabase
     .from('admin_users')
-    .select('id, name, email, role, status, created_at')
+    .select('id, name, email, role, status, affiliate_code, commission_rate, created_at')
     .eq('auth_user_id', authUser.id)
     .maybeSingle();
 
@@ -92,6 +92,22 @@ export const useAuthStore = create((set, get) => ({
       set({ user: null });
     } finally {
       set({ isReady: true });
+    }
+  },
+
+  refreshProfile: async () => {
+    if (!supabase) return null;
+
+    try {
+      const { data: { user: authUser }, error } = await supabase.auth.getUser();
+      if (error || !authUser) throw error || new Error('Session expired.');
+
+      const user = await loadProfile(authUser);
+      set({ user });
+      return user;
+    } catch (error) {
+      console.error('Erro ao atualizar dados da sessão:', error);
+      return null;
     }
   },
 

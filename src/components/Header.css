@@ -469,7 +469,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 1000001;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -607,6 +607,31 @@
   color: var(--primary);
   font-weight: 700;
   text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .cep-modal-content {
+    padding: 2rem 1.25rem;
+  }
+
+  .cep-modal-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .cep-input-wrapper {
+    flex-direction: column;
+  }
+
+  .cep-input-wrapper input {
+    width: 100%;
+    min-width: 0;
+    font-size: 1rem;
+  }
+
+  .btn-check-cep {
+    width: 100%;
+    min-height: 48px;
+  }
 }
 
 @keyframes modal-slideUp {

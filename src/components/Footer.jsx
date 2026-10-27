@@ -51,7 +51,6 @@ const Footer = () => {
           <h3>Institucional</h3>
           <div className="footer-links">
             <Link to="/sobre">Quem Somos</Link>
-            <Link to="/nossas-lojas">Nossas Lojas</Link>
             <Link to="/politica-de-privacidade">Política de Privacidade</Link>
             <Link to="/trocas-e-devolucoes">Política de Troca</Link>
           </div>

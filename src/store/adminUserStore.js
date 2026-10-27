@@ -30,7 +30,7 @@ export const useAdminUserStore = create(
         // Nunca selecionar a coluna password
         const { data, error } = await supabase
           .from('admin_users')
-          .select('id, name, email, role, status, created_at')
+          .select('id, name, email, role, status, affiliate_code, commission_rate, created_at')
           .order('name');
 
         if (error) throw error;
@@ -48,6 +48,7 @@ export const useAdminUserStore = create(
         set((state) => ({
           adminUsers: [...state.adminUsers, result.user]
         }));
+        return result.user;
       } catch (err) {
         console.error('Erro ao adicionar usuário admin no Supabase:', err);
         throw err;

@@ -3,8 +3,8 @@ import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
   ShieldCheck, HelpCircle, Info, MapPin, 
-  RefreshCw, MessageCircle, ChevronRight,
-  Target, Heart, Star, Phone, Mail, Clock
+  RefreshCw, MessageCircle,
+  Target, Heart, Star, Phone, Mail
 } from 'lucide-react';
 import './Institutional.jsx.css';
 
@@ -45,44 +45,6 @@ const Institutional = () => {
             <p className="inst-text">
               Com raízes profundas em Viamão/RS, a Agropets consolidou-se como uma agropecuária de referência, unindo a tradição e modernidade dos melhores cuidados pet. Nossa estrutura integra uma loja completa com insumos agrícolas, rações de alta de qualidade, acessórios premium e atendimento veterinário preparado para todas as necessidades do seu melhor amigo e da sua produção.
             </p>
-          </div>
-        );
-      case '/nossas-lojas':
-        return (
-          <div className="inst-content fade-in">
-            <h1 className="inst-title"><MapPin size={32} /> Nossas Lojas</h1>
-            <div className="store-card bento-item">
-              <div className="store-info">
-                <h2>Agropets - Matriz Viamão</h2>
-                <div className="info-item">
-                  <MapPin size={18} />
-                  <span>Av. Senador Salgado Filho, 3631 - Viamópolis, Viamão - RS</span>
-                </div>
-                <div className="info-item">
-                  <Clock size={18} />
-                  <span>Segunda a Sábado: 08:00 às 19:00</span>
-                </div>
-                <div className="info-item">
-                  <Clock size={18} />
-                  <span><strong>Veterinária:</strong> Segundas e Sextas-feiras</span>
-                </div>
-                <div className="info-item">
-                  <Phone size={18} />
-                  <span>(51) 9 8624-0794</span>
-                </div>
-                <a 
-                  href="https://www.google.com/maps/search/?api=1&query=Agropets+Av.+Senador+Salgado+Filho+3631+Viamão+RS" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="btn-primary-slim"
-                >
-                  Ver no Mapa <ChevronRight size={16} />
-                </a>
-              </div>
-              <div className="store-map-placeholder">
-                <img src="/agrovet-shop.png" alt="Agropets Matriz Viamão" />
-              </div>
-            </div>
           </div>
         );
       case '/politica-de-privacidade':
@@ -194,7 +156,6 @@ const Institutional = () => {
     <div className="institutional-page container">
       <div className="inst-sidebar">
         <Link to="/sobre" className={path === '/sobre' ? 'active' : ''}>Quem Somos</Link>
-        <Link to="/nossas-lojas" className={path === '/nossas-lojas' ? 'active' : ''}>Nossas Lojas</Link>
         <Link to="/faq" className={path === '/faq' ? 'active' : ''}>FAQ</Link>
         <Link to="/politica-de-privacidade" className={path === '/politica-de-privacidade' ? 'active' : ''}>Privacidade</Link>
         <Link to="/trocas-e-devolucoes" className={path === '/trocas-e-devolucoes' ? 'active' : ''}>Trocas</Link>

@@ -14,6 +14,7 @@ import { emailService } from '../services/emailService';
 import { useCouponStore } from '../store/couponStore';
 import { getCoordsFromCep, calculateHaversineDistance, STORE_COORDS, getCoordsFromAddress } from '../utils/distanceUtils';
 import { buildPixCopyPaste, getPixMerchantCity } from '../utils/pixUtils';
+import { getSellerReferralCode, clearSellerReferral } from '../utils/sellerAttribution';
 import toast from 'react-hot-toast';
 import './Checkout.css';
 
@@ -308,7 +309,8 @@ const Checkout = () => {
           items: orderData.items,
           address: orderData.address,
           cep: orderData.cep,
-          coupon_used: orderData.couponUsed
+          coupon_used: orderData.couponUsed,
+          seller_referral_code: getSellerReferralCode()
         }])
         .select('id')
         .single();
@@ -322,6 +324,8 @@ const Checkout = () => {
       // 2. A reserva e o log de estoque ocorrem em uma única transação no banco.
       const { error: stockError } = await supabase.rpc('reserve_order_stock', { p_order_id: savedOrder.id });
       if (stockError) throw stockError;
+
+      clearSellerReferral();
 
       // 3. Resgatar cupom (apenas após pedido confirmado)
       if (appliedCoupon) {

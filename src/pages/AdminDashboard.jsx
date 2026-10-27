@@ -34,6 +34,7 @@ import TeamManager from '../components/admin/TeamManager';
 import CategoryManager from '../components/admin/CategoryManager';
 import SettingsManager from '../components/admin/SettingsManager';
 import InventoryLogs from '../components/admin/InventoryLogs';
+import SellerManager from '../components/admin/SellerManager';
 
 import './AdminDashboard.css';
 
@@ -197,6 +198,7 @@ const AdminDashboard = () => {
           <button className={`nav-link-modern ${activeTab === 'categories' ? 'active' : ''}`} onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}><div className="icon-box"><Grid size={20} /></div><span>Categorias</span></button>
           <button className={`nav-link-modern ${activeTab === 'marketing' ? 'active' : ''}`} onClick={() => { setActiveTab('marketing'); setIsSidebarOpen(false); }}><div className="icon-box"><Rocket size={20} /></div><span>Marketing</span></button>
           <button className={`nav-link-modern ${activeTab === 'team' ? 'active' : ''}`} onClick={() => { setActiveTab('team'); setIsSidebarOpen(false); }}><div className="icon-box"><Shield size={20} /></div><span>Equipe</span></button>
+          <button className={`nav-link-modern ${activeTab === 'sellers' ? 'active' : ''}`} onClick={() => { setActiveTab('sellers'); setIsSidebarOpen(false); }}><div className="icon-box"><Users size={20} /></div><span>Vendedores</span></button>
           <button className={`nav-link-modern ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => { setActiveTab('settings'); setIsSidebarOpen(false); }}><div className="icon-box"><Settings size={20} /></div><span>Ajustes</span></button>
           <div className="nav-divider"></div>
           <button className="nav-link-modern" onClick={handleLogout}><div className="icon-box"><LogOut size={20} /></div><span>Sair</span></button>
@@ -233,6 +235,7 @@ const AdminDashboard = () => {
           {activeTab === 'marketing' && <MarketingManager openModal={openModal} />}
           {activeTab === 'settings' && <SettingsManager />}
           {activeTab === 'team' && <TeamManager openModal={openModal} />}
+          {activeTab === 'sellers' && <SellerManager />}
           {activeTab === 'categories' && <CategoryManager openModal={openModal} />}
         </section>
       </main>
@@ -346,6 +349,7 @@ const AdminDashboard = () => {
                       <select className="admin-input" value={teamForm.role} onChange={e => setTeamForm({...teamForm, role: e.target.value})} style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                         <option value="admin">Administrador (Total)</option>
                         <option value="editor">Editor (Restrito)</option>
+                        <option value="seller">Vendedor (Acesso às vendas próprias)</option>
                       </select>
                     </div>
                   </div>

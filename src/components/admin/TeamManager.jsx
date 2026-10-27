@@ -54,7 +54,7 @@ const TeamManager = ({ openModal }) => {
                   <td><span style={{ opacity: 0.7, fontSize: '0.9rem' }}>{u.email}</span></td>
                   <td>
                     <span className={`tag-category ${u.role === 'admin' ? 'green' : 'gray'}`} style={{ fontWeight: 800, fontSize: '0.7rem' }}>
-                      {u.role === 'admin' ? 'Administrador' : 'Editor'}
+                      {u.role === 'admin' ? 'Administrador' : u.role === 'seller' ? 'Vendedor' : u.role === 'vet' ? 'Veterinário' : 'Editor'}
                     </span>
                   </td>
                   <td>
@@ -66,7 +66,7 @@ const TeamManager = ({ openModal }) => {
                     <div className="action-buttons-modern" style={{ justifyContent: 'flex-end' }}>
                       <button className="btn-action-outline edit" onClick={() => openModal('team', u)} title="Editar"><Edit size={14} /></button>
                       <button className="btn-action-outline" onClick={() => toggleUserStatus(u.id)} title={u.status === 'active' ? 'Desativar' : 'Ativar'} style={{ color: u.status === 'active' ? 'var(--accent-orange)' : 'var(--brand-p)' }}><Power size={14} /></button>
-                      <button className="btn-action-outline delete" onClick={() => handleDeleteTeam(u.id)} title="Excluir"><Trash2 size={14} /></button>
+                      {u.role !== 'seller' && <button className="btn-action-outline delete" onClick={() => handleDeleteTeam(u.id)} title="Excluir"><Trash2 size={14} /></button>}
                     </div>
                   </td>
                 </tr>

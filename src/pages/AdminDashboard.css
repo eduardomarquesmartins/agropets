@@ -27,7 +27,7 @@
 .admin-layout {
   display: flex;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   background-color: var(--bg-main);
   font-family: 'Outfit', sans-serif;
   color: var(--text-h);
@@ -98,12 +98,26 @@
   gap: 0.2rem; 
   flex: 1; 
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  padding-right: 0.25rem;
 }
 
 .admin-nav-modern::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+}
+
+.admin-nav-modern::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-nav-modern::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #cbd5e1;
+}
+
+.admin-nav-modern::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-p);
 }
 
 .nav-link-modern {
@@ -173,7 +187,7 @@
 }
 
 /* VIEWPORT & HEADER */
-.admin-main-viewport { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; padding-bottom: 0 !important; }
+.admin-main-viewport { flex: 1; min-width: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%; padding-bottom: 0 !important; }
 
 .admin-top-header {
   height: var(--header-h);
@@ -368,7 +382,6 @@
 .status-capsule.green { background: #dcfce7; color: #15803d; }
 .status-capsule.orange { background: #ffedd5; color: #9a3412; }
 .status-capsule.gray { background: #f1f5f9; color: #475569; }
-.status-capsule.green { background: #e0f2fe; color: #0369a1; }
 
 .inventory-badge { padding: 3px 6px; border-radius: 4px; font-size: 0.6rem; font-weight: 600; }
 .inventory-badge.warning { background: #fff7ed; color: #9a3412; border: 1px solid #ffedd5; }
@@ -384,6 +397,16 @@
   display: flex; align-items: center; justify-content: center; 
   border-radius: 8px; border: 1px solid transparent; 
   background: #f8fafc; color: #64748b; transition: all 0.2s ease;
+}
+.btn-action-outline.btn-action-text {
+  width: auto;
+  min-width: 68px;
+  height: 36px;
+  padding: 0 10px;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 .btn-action-outline:hover { 
   background: white; border-color: var(--border); 
@@ -660,7 +683,8 @@
     display: none;
   }
   
-  .btn-primary-modern, .btn-secondary-modern {
+  .dashboard-intro > div:last-child > .btn-primary-modern,
+  .dashboard-intro > div:last-child > .btn-secondary-modern {
     width: 100%;
     justify-content: center;
   }
@@ -669,7 +693,7 @@
     width: 100%;
   }
   
-  .dashboard-intro div:last-child {
+  .dashboard-intro > div:last-child {
     width: 100%;
     display: flex;
     flex-direction: column;

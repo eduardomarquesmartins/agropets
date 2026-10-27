@@ -339,7 +339,7 @@ const AgroVetSection = () => {
             />
           </div>
           <div className="av-service-info">
-            <span className="av-service-tag" style={{ background: '#dcfce7', color: '#15803d' }}>Veterinário</span>
+            <span className="av-service-tag" style={{ color: '#15803d' }}>Veterinário</span>
             <h2 className="av-service-title">Consulta<br />Veterinária</h2>
             <p className="av-service-desc">
               Atendimento veterinário completo para cães, gatos e animais de pequeno porte. Nossa veterinária faz diagnóstico preciso, orientação de tratamento e acompanhamento com muito carinho.
@@ -373,7 +373,7 @@ const AgroVetSection = () => {
             />
           </div>
           <div className="av-service-info">
-            <span className="av-service-tag" style={{ background: '#dcfce7', color: '#166534' }}>Farmácia</span>
+            <span className="av-service-tag" style={{ color: '#166534' }}>Farmácia</span>
             <h2 className="av-service-title">Farmácia<br />Veterinária</h2>
             <p className="av-service-desc">
               Linha completa de medicamentos, antiparasitários, suplementos e nutracêuticos com orientação do nosso time técnico. Você sai da consulta e já resolve tudo na mesma visita.
@@ -407,7 +407,7 @@ const AgroVetSection = () => {
             />
           </div>
           <div className="av-service-info">
-            <span className="av-service-tag" style={{ background: '#fef3c7', color: '#b45309' }}>Loja</span>
+            <span className="av-service-tag" style={{ color: '#b45309' }}>Loja</span>
             <h2 className="av-service-title">Produtos<br />para o seu PET</h2>
             <p className="av-service-desc">
               Rações premium, petiscos, brinquedos, coleiras e acessórios das melhores marcas. Com entrega em Viamão e região — porque o cuidado começa em casa.

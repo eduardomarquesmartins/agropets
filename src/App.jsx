@@ -32,6 +32,7 @@ import { useAdminUserStore } from './store/adminUserStore';
 import { useFinancialStore } from './store/financialStore';
 import { useInventoryStore } from './store/inventoryStore';
 import { useAppointmentStore } from './store/appointmentStore';
+import { captureSellerReferral } from './utils/sellerAttribution';
 
 const Cart = lazyWithRetry(() => import('./pages/Cart'));
 const Login = lazyWithRetry(() => import('./pages/Login'));
@@ -43,6 +44,7 @@ const ProductDetail = lazyWithRetry(() => import('./pages/ProductDetail'));
 const VetDashboard = lazyWithRetry(() => import('./pages/VetDashboard'));
 const Institutional = lazyWithRetry(() => import('./pages/Institutional'));
 const SearchPage = lazyWithRetry(() => import('./pages/SearchPage'));
+const SellerDashboard = lazyWithRetry(() => import('./pages/SellerDashboard'));
 
 function Home() {
   const searchQuery = useSearchStore((state) => state.searchQuery);
@@ -110,6 +112,9 @@ function SearchPageRoute() {
 }
 
 function AppContent() {
+  React.useEffect(() => {
+    captureSellerReferral(window.location.search);
+  }, []);
   const { user, initialize } = useAuthStore();
   const isAdmin = user?.role === 'admin';
   const isVet = user?.role === 'vet';
@@ -185,7 +190,6 @@ function AppContent() {
         <Route path="/busca" element={<SearchPageRoute />} />
         <Route path="/ofertas" element={<Navigate to="/busca?discount=1&sort=discount" replace />} />
         <Route path="/sobre" element={<Institutional />} />
-        <Route path="/nossas-lojas" element={<Institutional />} />
         <Route path="/politica-de-privacidade" element={<Institutional />} />
         <Route path="/trocas-e-devolucoes" element={<Institutional />} />
         <Route path="/faq" element={<Institutional />} />
@@ -206,6 +210,14 @@ function AppContent() {
           element={
             <ProtectedRoute allowedRoles={['vet']}>
               <VetDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/vendedor"
+          element={
+            <ProtectedRoute allowedRoles={['seller']}>
+              <SellerDashboard />
             </ProtectedRoute>
           }
         />

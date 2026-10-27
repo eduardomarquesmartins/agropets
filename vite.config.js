@@ -37,6 +37,39 @@ const localApiPlugin = () => ({
       const { default: tefPaymentHandler } = await import('./api/tef-payment.js');
       await tefPaymentHandler(req, response);
     });
+
+    server.middlewares.use('/api/admin-users', async (req, res) => {
+      req.body = await readJsonBody(req).catch(() => ({}));
+
+      const response = {
+        statusCode: 200,
+        status(code) {
+          this.statusCode = code;
+          return this;
+        },
+        json(payload) {
+          res.statusCode = this.statusCode;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(payload));
+        },
+        end() {
+          res.statusCode = this.statusCode;
+          res.end();
+        },
+      };
+
+      try {
+        const { default: adminUsersHandler } = await import('./api/admin-users.js');
+        await adminUsersHandler(req, response);
+      } catch (error) {
+        console.error('Local admin-users API error:', error);
+        if (!res.writableEnded) {
+          res.statusCode = error.statusCode || 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: error.message || 'Internal server error' }));
+        }
+      }
+    });
   },
 });
 
