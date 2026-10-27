@@ -15,6 +15,9 @@ const getSellerLink = (seller) => {
   return url.toString();
 };
 
+const getPayableOrders = (orders, sellerId) => orders.filter((order) => order.seller_id === sellerId
+  && order.payment_status === 'paid' && order.commission_status === 'payable');
+
 const SellerManager = () => {
   const { adminUsers, addAdminUser, updateAdminUser, deleteAdminUser, toggleUserStatus, isLoading } = useAdminUserStore();
   const { orders, fetchOrders } = useOrderStore();
@@ -44,7 +47,7 @@ const SellerManager = () => {
       orderCount: sellerOrders.length,
       salesTotal: sellerOrders.filter((order) => order.payment_status === 'paid' && order.status !== 'Cancelado').reduce((sum, order) => sum + (Number(order.total) || 0), 0),
       awaitingPayment: earned.filter((order) => order.commission_status === 'awaiting_payment' || order.commission_status === 'pending').reduce((sum, order) => sum + (Number(order.commission_amount) || 0), 0),
-      payable: earned.filter((order) => order.commission_status === 'payable').reduce((sum, order) => sum + (Number(order.commission_amount) || 0), 0),
+      payable: getPayableOrders(sellerOrders, seller.id).reduce((sum, order) => sum + (Number(order.commission_amount) || 0), 0),
       paid: earned.filter((order) => order.commission_status === 'paid').reduce((sum, order) => sum + (Number(order.commission_amount) || 0), 0),
     };
   }).filter((seller) => `${seller.name} ${seller.email} ${seller.affiliate_code}`.toLowerCase().includes(search.toLowerCase())), [sellers, orders, search]);
@@ -129,6 +132,10 @@ const SellerManager = () => {
   const paidTotal = commissionOrders.filter((order) => order.commission_status === 'paid').reduce((sum, order) => sum + (Number(order.commission_amount) || 0), 0);
 
   const openPayout = (seller) => {
+    if (!getPayableOrders(orders, seller.id).length) {
+      toast.error('Este vendedor não tem comissões liberadas para repasse.');
+      return;
+    }
     setPayoutSeller(seller);
     setPayoutForm({ payment_method: 'pix', reference: '', notes: '' });
   };
@@ -200,7 +207,7 @@ const SellerManager = () => {
                   <td><span className={`status-capsule ${seller.status === 'active' ? 'green' : 'gray'}`}>{seller.status === 'active' ? 'Ativo' : 'Inativo'}</span></td>
                   <td><div className="action-buttons-modern">
                     <button className="btn-action-outline btn-action-text edit" title="Editar vendedor" onClick={() => openForm(seller)}>Editar</button>
-                    <button className="btn-action-outline btn-action-text edit" title="Registrar repasse das comissões liberadas" disabled={!seller.payable} onClick={() => openPayout(seller)}><Banknote size={14} /> Repassar</button>
+                    <button className="btn-action-outline btn-action-text edit" title={seller.payable ? 'Registrar repasse das comissões liberadas' : 'Sem comissões liberadas para repasse'} onClick={() => openPayout(seller)}><Banknote size={14} /> Repassar</button>
                     <button className="btn-action-outline btn-action-text" title={seller.status === 'active' ? 'Desativar' : 'Ativar'} onClick={() => toggleUserStatus(seller.id)}>{seller.status === 'active' ? 'Pausar' : 'Ativar'}</button>
                     <button
                       className="btn-action-outline btn-action-text seller-remove-action"
