@@ -31,6 +31,14 @@ const getWhatsAppLink = (phone) => {
   return cleaned.startsWith('55') ? `https://wa.me/${cleaned}` : `https://wa.me/55${cleaned}`;
 };
 
+const getDropdownPosition = (element) => {
+  const rect = element.getBoundingClientRect();
+  const gutter = 12;
+  const menuWidth = Math.min(230, window.innerWidth - gutter * 2);
+  const left = Math.max(gutter, Math.min(rect.left, rect.right - menuWidth));
+  return { top: rect.bottom + 6, left };
+};
+
 const NavItem = ({ cat, catIcons }) => {
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
@@ -40,8 +48,7 @@ const NavItem = ({ cat, catIcons }) => {
   const onEnter = () => {
     clearTimeout(timer.current);
     if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setPos({ top: rect.bottom + 6, left: rect.left });
+      setPos(getDropdownPosition(ref.current));
     }
     setOpen(true);
   };
@@ -294,8 +301,7 @@ const Header = () => {
               onMouseEnter={() => {
                 clearTimeout(dropdownTimer.current);
                 if (catTriggerRef.current) {
-                  const rect = catTriggerRef.current.getBoundingClientRect();
-                  setDropdownPos({ top: rect.bottom + 6, left: rect.left });
+                  setDropdownPos(getDropdownPosition(catTriggerRef.current));
                 }
                 setCatDropdownOpen(true);
               }}

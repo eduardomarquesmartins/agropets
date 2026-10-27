@@ -8,6 +8,15 @@ import { usePetStore } from '../store/petStore';
 import toast from 'react-hot-toast';
 import './UserDashboard.css';
 
+const getDisplayOrderNumber = (orderNumber) => {
+  const fullNumber = String(orderNumber || '').trim();
+  const normalizedId = fullNumber.replace(/^#?PED-/i, '').replace(/-/g, '').toUpperCase();
+
+  if (/^[0-9A-F]{32}$/.test(normalizedId)) return `PED-${normalizedId.slice(0, 10)}`;
+  if (fullNumber.length > 18) return `${fullNumber.slice(0, 12)}…${fullNumber.slice(-4)}`;
+  return fullNumber;
+};
+
 const UserDashboard = () => {
   const { user, logout, updateProfile } = useAuthStore();
   const navigate = useNavigate();
@@ -213,29 +222,49 @@ const UserDashboard = () => {
         </div>
       ) : (
         <div className="orders-list-premium">
-          {userOrders.map(order => (
-            <div key={order.id} className="order-card-premium">
-              <div className="order-main-info">
-                <div className="order-id-date">
-                  <span className="order-number">#{order.order_number}</span>
-                  <span className="order-date">{new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
+          {userOrders.map(order => {
+            const items = Array.isArray(order.items) ? order.items : [];
+            return (
+              <div key={order.id} className="order-card-premium">
+                <div className="order-main-info">
+                  <div className="order-id-date">
+                    <span className="order-number" title={`Número completo: ${order.order_number || order.id}`}>
+                      #{getDisplayOrderNumber(order.order_number || order.id)}
+                    </span>
+                    <span className="order-date">{new Date(order.created_at).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  <div className="order-status-badge" data-status={order.status}>
+                    {order.status === 'Entregue' ? <CheckCircle size={14} /> :
+                     order.status === 'Cancelado' ? <Trash2 size={14} /> : <Clock size={14} />}
+                    {order.status}
+                  </div>
                 </div>
-                <div className="order-status-badge" data-status={order.status}>
-                  {order.status === 'Entregue' ? <CheckCircle size={14} /> : 
-                   order.status === 'Cancelado' ? <Trash2 size={14} /> : <Clock size={14} />}
-                  {order.status}
+                <div className="order-items-summary">
+                  <div className="order-items-heading">
+                    <Box size={16} />
+                    <span>{items.length} {items.length === 1 ? 'produto' : 'produtos'}</span>
+                  </div>
+                  {items.length > 0 && (
+                    <ul className="order-items-list">
+                      {items.map((item, index) => (
+                        <li key={`${item.productId || item.id || item.name || 'item'}-${index}`}>
+                          <span className="order-item-quantity">{Number(item.qty || item.quantity || 1)}×</span>
+                          <span className="order-item-name">{item.name || item.product_name || 'Produto'}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+                <div className="order-footer">
+                  <span className="order-total">
+                    <span>Total:</span>
+                    <strong>R$ {Number(order.total).toFixed(2).replace('.', ',')}</strong>
+                  </span>
+                  <span className="order-payment">{order.payment}</span>
                 </div>
               </div>
-              <div className="order-items-summary">
-                <Box size={16} />
-                <span>{order.items?.length || 0} produto(s)</span>
-              </div>
-              <div className="order-footer">
-                <span className="order-total">Total: <strong>R$ {Number(order.total).toFixed(2).replace('.', ',')}</strong></span>
-                <span className="order-payment">{order.payment}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
