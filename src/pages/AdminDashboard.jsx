@@ -35,6 +35,7 @@ import CategoryManager from '../components/admin/CategoryManager';
 import SettingsManager from '../components/admin/SettingsManager';
 import InventoryLogs from '../components/admin/InventoryLogs';
 import SellerManager from '../components/admin/SellerManager';
+import PasswordInput from '../components/PasswordInput';
 
 import './AdminDashboard.css';
 
@@ -333,10 +334,9 @@ const AdminDashboard = () => {
                       <div className="form-group"><label>E-mail</label><input type="email" className="admin-input" required value={teamForm.email} onChange={e => setTeamForm({...teamForm, email: e.target.value})} style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} /></div>
                       <div className="form-group">
                         <label>{editingItem ? 'Nova Senha (opcional)' : 'Senha Temporária'}</label>
-                        <input 
-                          type="password" 
+                        <PasswordInput
                           placeholder={editingItem ? 'Deixe vazio para manter' : '••••••••'}
-                          className="admin-input" 
+                          inputClassName="admin-input"
                           required={!editingItem} 
                           value={teamForm.password || ''} 
                           onChange={e => setTeamForm({...teamForm, password: e.target.value})} 
@@ -398,10 +398,9 @@ const AdminDashboard = () => {
                     <div className="form-group"><label>E-mail</label><input type="email" className="admin-input" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} /></div>
                     <div className="form-group">
                       <label>Nova Senha (opcional)</label>
-                      <input 
-                        type="password" 
+                      <PasswordInput
                         placeholder="Deixe vazio para manter"
-                        className="admin-input" 
+                        inputClassName="admin-input"
                         value={profileForm.password || ''} 
                         onChange={e => setProfileForm({...profileForm, password: e.target.value})} 
                         style={{ width: '100%', padding: '0.8rem', border: '1px solid #e2e8f0', borderRadius: '8px' }} 
