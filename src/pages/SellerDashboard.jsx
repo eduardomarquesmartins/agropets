@@ -79,7 +79,7 @@ const SellerDashboard = () => {
         <section className="seller-dashboard__card seller-dashboard__referral">
           <div className="seller-dashboard__section-heading">
             <span className="seller-dashboard__heading-icon"><ExternalLink size={18} /></span>
-          <div><h2>Seu link da loja</h2><p>As compras ficam atribuídas a você quando o cliente abre seu link neste navegador. A atribuição vale por 30 dias; se ele abrir outro link de vendedor depois, vale o último link.</p></div>
+          <div><h2>Seu link da loja</h2><p>As compras ficam atribuídas a você somente na sessão iniciada pelo seu link de produto ou da loja. Se o cliente voltar em outra visita direto à loja, o pedido não será vinculado.</p></div>
           </div>
           <div className="seller-dashboard__link-row">
             <input aria-label="Link geral de vendas" readOnly value={referralLink} />

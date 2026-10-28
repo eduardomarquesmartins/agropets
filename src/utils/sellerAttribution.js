@@ -1,11 +1,14 @@
 const STORAGE_KEY = 'agropets-seller-referral';
-const ATTRIBUTION_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
 export const captureSellerReferral = (search = '') => {
   try {
     const code = new URLSearchParams(search).get('ref')?.trim();
+    localStorage.removeItem(STORAGE_KEY);
+
     if (code) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ code, capturedAt: Date.now() }));
+      sessionStorage.setItem(STORAGE_KEY, code.slice(0, 80));
+    } else {
+      sessionStorage.removeItem(STORAGE_KEY);
     }
   } catch (error) {
     console.warn('Não foi possível guardar o link do vendedor:', error);
@@ -14,12 +17,7 @@ export const captureSellerReferral = (search = '') => {
 
 export const getSellerReferralCode = () => {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-    if (!saved?.code || Date.now() - saved.capturedAt > ATTRIBUTION_WINDOW_MS) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return String(saved.code).slice(0, 80);
+    return sessionStorage.getItem(STORAGE_KEY)?.slice(0, 80) || null;
   } catch {
     return null;
   }
@@ -27,6 +25,7 @@ export const getSellerReferralCode = () => {
 
 export const clearSellerReferral = () => {
   try {
+    sessionStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(STORAGE_KEY);
   } catch {
     // Storage can be disabled by the browser; attribution is optional.
